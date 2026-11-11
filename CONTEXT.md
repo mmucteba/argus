@@ -55,6 +55,8 @@ Every fact has a status. Only `datasheet`, `standard` and `measured` count as ve
 - **needs re-check:** all its facts are verified, but nobody has re-checked the part against them yet. The audit opens a re-check task for it.
 - **confirmed:** re-checked against the current verified values; `contracts.yaml` stores a fingerprint of those values. If any of them changes later, the part drops back to needs re-check by itself.
 
+Each fact names the bought item it comes from (`buy:`, keys of `spec/bom.yaml`). A fact cannot be more than `assumed` until that item is picked with a link to one product page (a search link does not count); then the shop page makes it `listing`, the maker's drawing `datasheet`, and our own part `measured`. Standard sizes (M3 nut, 608) do not depend on the product.
+
 **Verify first, then design.** When your task's part is provisional, do the verify tasks for its facts first: measure the real part or find the datasheet, put the proof in `evidence/<item>/`, update `spec/facts.yaml`. Design tasks stay labelled `waiting` until then. The audit runs every day and after every merge: it opens and closes verify and re-check tasks and updates the Status board issue.
 
 ## Rules

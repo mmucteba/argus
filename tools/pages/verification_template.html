@@ -1,0 +1,450 @@
+<title>ARGUS Verification Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Saira+Condensed:wght@600;700&display=swap">
+<style>
+/* layout: status strip, buying-to-facts ladder, unblock order, a three column map (bought items, facts, parts) with a detail panel, the shopping list, the part list */
+:root {
+  --bg: #eef0f4; --surface: #ffffff; --ink: #1a1c25; --muted: #5b6070; --line: #d9dce5; --accent: #5a3ea6; --accent-soft: #ece7f8;
+  --good: #23744a; --good-bg: #dcefe4; --warn: #915c10; --warn-bg: #f5e8cf; --bad: #b4372d; --bad-bg: #f8dfdb;
+  --idle: #4a5170; --idle-bg: #e3e6ef; --listing: #c26a12; --listing-bg: #fbe9d4; --edge: #b9bdcb;
+  --f-display: "Saira Condensed", "Arial Narrow", sans-serif; --f-body: "IBM Plex Sans", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1117; --surface: #171a23; --ink: #e6e7ee; --muted: #9a9fb1; --line: #2a2f3c; --accent: #a48cff; --accent-soft: #2a2347;
+  --good: #62c891; --good-bg: #15301f; --warn: #e9b45a; --warn-bg: #36290f; --bad: #ff8a7e; --bad-bg: #3a1c19;
+  --idle: #aab2d0; --idle-bg: #232838; --listing: #ffae5c; --listing-bg: #3a2812; --edge: #3a4052; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1117; --surface: #171a23; --ink: #e6e7ee; --muted: #9a9fb1; --line: #2a2f3c; --accent: #a48cff; --accent-soft: #2a2347;
+  --good: #62c891; --good-bg: #15301f; --warn: #e9b45a; --warn-bg: #36290f; --bad: #ff8a7e; --bad-bg: #3a1c19;
+  --idle: #aab2d0; --idle-bg: #232838; --listing: #ffae5c; --listing-bg: #3a2812; --edge: #3a4052; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.45; margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
+.wrap { max-width: 1160px; margin: 0 auto; display: grid; gap: 22px; }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: 34px; letter-spacing: 0.04em; margin: 0; line-height: 1; text-wrap: balance; }
+h1 span { color: var(--accent); }
+h2 { font-family: var(--f-display); font-weight: 600; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+h3 { margin: 0; font-size: 16px; }
+.sub { color: var(--muted); margin: 6px 0 0; max-width: 80ch; }
+a { color: var(--accent); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+.mono { font-family: var(--f-mono); }
+.hint { font-size: 12.5px; color: var(--muted); }
+.lead { margin: -4px 0 12px; }
+.chip { display: inline-block; font-family: var(--f-mono); font-size: 11px; padding: 2px 7px; border-radius: 4px; white-space: nowrap; }
+.s-assumed { background: var(--bad-bg); color: var(--bad); } .s-listing { background: var(--listing-bg); color: var(--listing); }
+.s-datasheet, .s-standard, .s-measured { background: var(--good-bg); color: var(--good); }
+.p-provisional { background: var(--idle-bg); color: var(--idle); } .p-re-check { background: var(--warn-bg); color: var(--warn); }
+.p-confirmed { background: var(--good-bg); color: var(--good); }
+.b-open { background: var(--bad-bg); color: var(--bad); } .b-no-link { background: var(--warn-bg); color: var(--warn); }
+.b-picked, .b-home { background: var(--good-bg); color: var(--good); } .b-none { background: var(--idle-bg); color: var(--idle); }
+
+/* summary */
+.sum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.big { font-family: var(--f-mono); font-size: 28px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.big small { font-size: 15px; color: var(--muted); }
+.bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--idle-bg); margin: 10px 0 8px; }
+.bar i { display: block; height: 100%; }
+.leg { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--muted); }
+.leg b { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+@media (max-width: 900px) { .sum { grid-template-columns: minmax(0, 1fr); } }
+
+/* path */
+.path { overflow-x: auto; }
+.path svg { display: block; width: 100%; min-width: 760px; height: auto; }
+.steps { display: none; margin: 0; padding: 0; list-style: none; gap: 8px; }
+.steps li { border: 1px solid var(--line); border-left-width: 4px; border-radius: 8px; padding: 10px 12px; font-size: 13px; }
+.steps b { display: block; font-size: 14px; margin-bottom: 2px; }
+.steps .s1 { border-left-color: var(--bad); } .steps .s2 { border-left-color: var(--accent); } .steps .s3 { border-left-color: var(--warn); } .steps .s4 { border-left-color: var(--good); }
+@media (max-width: 720px) { .path { display: none; } .steps { display: grid; } }
+.pt { font: 600 14px var(--f-body); fill: var(--ink); } .ps { font: 400 12px var(--f-body); fill: var(--muted); }
+.pn { font: 700 22px var(--f-display); fill: var(--accent); }
+
+/* buying to facts ladder */
+.ladder { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 28px; position: relative; }
+.rung { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 8px; align-content: start; position: relative; background: var(--surface); }
+.rung + .rung::before { content: ""; position: absolute; left: -24px; top: 50%; width: 20px; border-top: 1.5px solid var(--muted); }
+.rung + .rung::after { content: ""; position: absolute; left: -9px; top: calc(50% - 4px); border: 4.5px solid transparent; border-left: 6px solid var(--muted); }
+.rung .row { display: grid; gap: 3px; }
+.rung .lab { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.rung p { margin: 0; font-size: 12.5px; color: var(--muted); }
+.rung .now { font-size: 12.5px; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 8px; display: grid; gap: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.ladnote { grid-column: 1 / -1; margin: 14px 0 0; line-height: 1.9; }
+.rung.r1 { border-top: 3px solid var(--bad); } .rung.r2 { border-top: 3px solid var(--warn); } .rung.r3 { border-top: 3px solid var(--listing); } .rung.r4 { border-top: 3px solid var(--good); }
+@media (max-width: 860px) { .ladder { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  .rung + .rung::before { left: 50%; top: -20px; width: 0; height: 16px; border-top: 0; border-left: 1.5px solid var(--muted); }
+  .rung + .rung::after { left: calc(50% - 4px); top: -9px; border: 4.5px solid transparent; border-top: 6px solid var(--muted); } }
+
+/* unblock */
+.ub-row { display: grid; grid-template-columns: 11.5em minmax(0, 1fr) 12em 3.6em; gap: 12px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+.ub-row:last-child { border-bottom: 0; }
+.ub-row:hover .ub-name, .ub-row:focus-visible .ub-name { color: var(--accent); }
+.ub-row:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ub-name { font-family: var(--f-mono); font-size: 13px; font-weight: 500; }
+.ub-how { font-size: 13px; color: var(--muted); display: grid; gap: 3px; }
+.ub-buy { font-size: 12.5px; }
+.ub-barw { display: grid; gap: 3px; }
+.ub-bar { display: block; height: 8px; background: var(--idle-bg); border-radius: 4px; overflow: hidden; }
+.ub-bar i { display: block; height: 100%; background: var(--bad); }
+.ub-n { font-family: var(--f-mono); font-size: 12px; color: var(--muted); text-align: right; }
+@media (max-width: 720px) { .ub-row { grid-template-columns: minmax(0, 1fr) 3.6em; grid-template-areas: 'name n' 'how how' 'bar bar'; row-gap: 6px; }
+  .ub-row > :nth-child(1) { grid-area: name; } .ub-how { grid-area: how; } .ub-barw { grid-area: bar; } .ub-n { grid-area: n; align-self: start; } }
+
+/* map */
+.mapgrid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 16px; align-items: start; }
+@media (max-width: 1080px) { .mapgrid { grid-template-columns: minmax(0, 1fr); } }
+.map { overflow-x: auto; }
+.map svg { display: block; width: 100%; min-width: 760px; height: auto; }
+.edge { fill: none; stroke: var(--edge); stroke-width: 1; opacity: 0.55; transition: opacity .15s; }
+.edge.on { stroke: var(--accent); stroke-width: 2; opacity: 1; }
+.edge.on.bad { stroke: var(--bad); } .edge.on.amber { stroke: var(--warn); }
+.node { cursor: pointer; transition: opacity .15s; }
+.node text { font: 500 12px var(--f-mono); fill: var(--ink); }
+.node.dim { opacity: 0.32; }
+.node.sel text { font-weight: 700; fill: var(--accent); }
+.node:focus-visible { outline: none; }
+.node:focus-visible text { text-decoration: underline; }
+.pill { fill: var(--surface); stroke-width: 1.5; }
+.colhead { font: 600 12px var(--f-body); fill: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.grp { font: 500 11px var(--f-mono); fill: var(--muted); }
+.detail { position: sticky; top: max(12px, env(safe-area-inset-top, 0px)); display: grid; gap: 10px; }
+.detail .kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 12px; }
+.detail .kv dt { color: var(--muted); font-family: var(--f-mono); font-size: 12px; }
+.detail .kv dd { margin: 0; font-family: var(--f-mono); font-size: 12px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.detail p { margin: 0; font-size: 13px; }
+.detail ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; }
+
+/* tables */
+.tbl { overflow-x: auto; }
+.tbl table { min-width: 760px; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 8px 10px 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+td .chip { margin: 0 4px 3px 0; }
+td.num { font-family: var(--f-mono); font-size: 12.5px; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+th.num { text-align: right; }
+tr.grow td { padding-top: 18px; border-bottom: 2px solid var(--line); }
+tr.grow:first-child td { padding-top: 4px; }
+tr.grow h3 { display: inline; font-size: 14px; margin-right: 8px; }
+tr.shop { cursor: pointer; }
+tr.shop:hover td:first-child b { color: var(--accent); }
+.it small { display: block; color: var(--muted); font-size: 12px; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.filters button { font: inherit; font-size: 12.5px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.foot { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.foot p { margin: 0; font-size: 13px; }
+@media (max-width: 860px) { .foot { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .edge, .node { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>ARGUS <span>T18</span> verification map</h1>
+    <p class="sub">What we buy, which numbers in the 3D design are proven, which are still guesses, and which parts wait on them. Snapshot of <span id="date"></span>; the live version is the <a id="boardlink" target="_blank" rel="noopener">Status board issue</a>, updated by the audit every day at 07:23.</p>
+  </header>
+
+  <section class="sum" aria-label="Summary">
+    <div class="panel"><h2>Bought items</h2><div class="big" id="shopBig"></div><div class="bar" id="shopBar"></div><div class="leg" id="shopLeg"></div></div>
+    <div class="panel"><h2>Facts</h2><div class="big" id="factBig"></div><div class="bar" id="factBar"></div><div class="leg" id="factLeg"></div></div>
+    <div class="panel"><h2>Printed parts</h2><div class="big" id="partBig"></div><div class="bar" id="partBar"></div><div class="leg" id="partLeg"></div></div>
+  </section>
+
+  <section class="panel">
+    <h2>From buying to a trusted number</h2>
+    <p class="hint lead">Each fact comes from a bought item (<span class="mono">buy:</span> in <span class="mono">spec/facts.yaml</span>). How far the item is picked sets how sure the fact can be. Counts are today's.</p>
+    <div class="ladder" id="ladder"></div>
+  </section>
+
+  <section class="panel">
+    <h2>How a part becomes trustworthy</h2>
+    <div class="path">
+      <svg viewBox="0 0 1100 200" role="img" aria-labelledby="pathT"><title id="pathT">Four steps: a fact is a guess, a verify task proves it, the part gets a re-check, the part is confirmed; a changed fact sends the part back to re-check</title>
+        <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker></defs>
+        <rect x="10" y="20" width="235" height="120" rx="8" style="fill:var(--bad-bg);stroke:var(--bad)"/>
+        <text class="pn" x="26" y="50">1</text><text class="pt" x="48" y="48">A fact is a guess</text>
+        <text class="ps" x="26" y="74">No product picked, or only a</text><text class="ps" x="26" y="92">shop page. Every part that uses</text><text class="ps" x="26" y="110">it is provisional and its design</text><text class="ps" x="26" y="128">task waits.</text>
+        <rect x="285" y="20" width="235" height="120" rx="8" style="fill:var(--surface);stroke:var(--accent)"/>
+        <text class="pn" x="301" y="50">2</text><text class="pt" x="323" y="48">Verify task</text>
+        <text class="ps" x="301" y="74">Pick and link the exact product,</text><text class="ps" x="301" y="92">then measure it or find the</text><text class="ps" x="301" y="110">maker's datasheet. Proof into</text><text class="ps" x="301" y="128">evidence/, numbers into facts.</text>
+        <rect x="560" y="20" width="235" height="120" rx="8" style="fill:var(--warn-bg);stroke:var(--warn)"/>
+        <text class="pn" x="576" y="50">3</text><text class="pt" x="598" y="48">Re-check task opens</text>
+        <text class="ps" x="576" y="74">When every fact a part uses is</text><text class="ps" x="576" y="92">verified, the audit opens a task</text><text class="ps" x="576" y="110">to redo that part against the</text><text class="ps" x="576" y="128">real numbers.</text>
+        <rect x="835" y="20" width="255" height="120" rx="8" style="fill:var(--good-bg);stroke:var(--good)"/>
+        <text class="pn" x="851" y="50">4</text><text class="pt" x="873" y="48">Confirmed</text>
+        <text class="ps" x="851" y="74">The re-check stores a fingerprint</text><text class="ps" x="851" y="92">of the exact values it was built</text><text class="ps" x="851" y="110">on. Safe to print.</text>
+        <path d="M245,80 L283,80" style="stroke:var(--muted);stroke-width:1.5;fill:none" marker-end="url(#ar)"/>
+        <path d="M520,80 L558,80" style="stroke:var(--muted);stroke-width:1.5;fill:none" marker-end="url(#ar)"/>
+        <path d="M795,80 L833,80" style="stroke:var(--muted);stroke-width:1.5;fill:none" marker-end="url(#ar)"/>
+        <path d="M962,140 C962,185 677,185 677,142" style="stroke:var(--warn);stroke-width:1.5;fill:none;stroke-dasharray:5 4" marker-end="url(#ar)"/>
+        <text class="ps" x="820" y="192" text-anchor="middle">a fact it uses changes later: back to re-check by itself</text>
+      </svg>
+    </div>
+    <ol class="steps">
+      <li class="s1"><b>1. A fact is a guess</b>No product picked, or only a shop page. Every part that uses it is provisional and its design task waits.</li>
+      <li class="s2"><b>2. Verify task</b>Pick and link the exact product, then measure it or find the maker's datasheet. Proof into evidence/, numbers into spec/facts.yaml.</li>
+      <li class="s3"><b>3. Re-check task opens</b>When every fact a part uses is verified, the audit opens a task to redo that part against the real numbers.</li>
+      <li class="s4"><b>4. Confirmed</b>The re-check stores a fingerprint of the exact values it was built on. Safe to print. If a fact it uses changes later, it goes back to step 3 by itself.</li>
+    </ol>
+  </section>
+
+  <section class="panel">
+    <h2>Unblock order: verify these first</h2>
+    <p class="hint lead">Sorted by how many printed parts wait on each fact. Select a row to see its connections on the map.</p>
+    <div id="ub"></div>
+  </section>
+
+  <section class="panel" id="mapsec">
+    <h2>Bought items, facts and parts</h2>
+    <p class="hint lead">Every line is a real link: a bought item gives a fact, a printed part reads the fact (recorded when the part is built). Select anything.</p>
+    <div class="mapgrid">
+      <div class="map"><svg id="map" role="img" aria-label="Bought items on the left, facts in the middle, printed parts on the right"></svg></div>
+      <aside class="panel detail" id="detail" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Shopping list</h2>
+    <p class="hint lead">Every item from <span class="mono">spec/bom.yaml</span>, grouped by how far it is picked. A search link is not a source: replace it with the exact product page. Select a row to see it on the map.</p>
+    <div class="filters" id="filters" role="group" aria-label="Show"></div>
+    <div class="tbl"><table>
+      <thead><tr><th>Item</th><th>Store</th><th class="num">Price</th><th>Link</th><th>Gives fact</th><th>BOM status</th></tr></thead>
+      <tbody id="stb"></tbody>
+    </table></div>
+  </section>
+
+  <section class="panel">
+    <h2>Every printed part</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>Part</th><th>Module</th><th>State</th><th>Waiting on</th><th>Task</th></tr></thead>
+      <tbody id="ptb"></tbody>
+    </table></div>
+  </section>
+
+  <section class="foot">
+    <div class="panel"><h2>Where it lives</h2><p><span class="mono">spec/bom.yaml</span> is what we buy and where. <span class="mono">spec/facts.yaml</span> holds every real-world size with its status, source and the item it comes from (<span class="mono">buy:</span>). Proof goes in <span class="mono">evidence/&lt;item&gt;/</span>.</p></div>
+    <div class="panel"><h2>What runs by itself</h2><p>The audit runs every day at 07:23 and after every merge. It opens verify tasks (with the shop link and whether the product is picked), opens re-check tasks, marks design tasks waiting and updates the Status board.</p></div>
+    <div class="panel"><h2>What you do</h2><p>Not picked: choose the exact product and put its page link in <span class="mono">bom.yaml</span>. Picked: find the datasheet or measure it when it arrives, put the proof in <span class="mono">evidence/</span>, update the fact, open a pull request. Turkish steps in <span class="mono">REHBER.md</span>.</p></div>
+  </section>
+</div>
+
+<script>
+const D = /*__DATA__*/null;
+const MOD_ORDER = ['light', 'x_axis', 'y_axis', 'slide', 'column', 'optics', 'overview', 'electronics'];
+const STATE_TXT = { provisional: 'provisional', 're-check': 'needs re-check', confirmed: 'confirmed' };
+const BUY = D.buy_txt;
+const $ = (s) => document.querySelector(s);
+const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const issue = (n) => n ? `<a href="${D.repo}/issues/${n}" target="_blank" rel="noopener">#${n}</a>` : '';
+const isSearch = (u) => /arama\?q=|\/ara\?q=|search\?q=/.test(u);
+const tl = (n) => n.toLocaleString('tr-TR', { maximumFractionDigits: 2 }) + ' TL';
+const F = Object.fromEntries(D.facts.map((f) => [f.key, f]));
+const P = Object.fromEntries(D.parts.map((p) => [p.key, p]));
+const S = Object.fromEntries(D.shop.map((s) => [s.key, s]));
+const bchip = (b) => b ? `<span class="chip b-${b}">${BUY[b]}</span>` : '<span class="chip b-none">nothing to buy</span>';
+const fchip = (k) => `<span class="chip s-${F[k].status}">${k}</span>`;
+const linkOf = (s) => !s.url ? '<span class="hint">no link</span>'
+  : `<a href="${esc(s.url)}" target="_blank" rel="noopener">${isSearch(s.url) ? 'search results' : 'product page'}</a>`;
+const factParts = (fs) => [...new Set(fs.flatMap((f) => F[f].parts))];
+
+$('#date').textContent = D.date;
+if (D.board) { $('#boardlink').href = `${D.repo}/issues/${D.board}`; $('#boardlink').textContent = `Status board issue #${D.board}`; }
+
+// summary
+function strip(id, segs, total) {
+  $(`#${id}Bar`).innerHTML = segs.map(([c, n]) => `<i style="width:${n / total * 100}%;background:${c}"></i>`).join('');
+  $(`#${id}Leg`).innerHTML = segs.map(([c, n, t]) => `<span><b style="background:${c}"></b>${n} ${t}</span>`).join('');
+}
+const sc = (b) => D.shop.filter((s) => s.buy === b).length, ns = D.shop.length;
+$('#shopBig').innerHTML = `${sc('picked') + sc('home')} <small>of ${ns} with a product link</small>`;
+strip('shop', [['var(--good)', sc('picked') + sc('home'), 'product link'], ['var(--warn)', sc('no-link'), 'search or no link'], ['var(--bad)', sc('open'), 'not picked']], ns);
+const nv = D.facts.filter((f) => f.verified).length, nf = D.facts.length;
+const st = (s) => D.facts.filter((f) => f.status === s).length;
+$('#factBig').innerHTML = `${nv} <small>of ${nf} verified</small>`;
+strip('fact', [['var(--good)', nv, 'verified'], ['var(--listing)', st('listing'), 'listing'], ['var(--bad)', st('assumed'), 'assumed']], nf);
+const pc = (s) => D.parts.filter((p) => p.state === s).length, np = D.parts.length;
+$('#partBig').innerHTML = `${pc('confirmed')} <small>of ${np} confirmed</small>`;
+strip('part', [['var(--good)', pc('confirmed'), 'confirmed'], ['var(--warn)', pc('re-check'), 'need a re-check'], ['var(--idle)', pc('provisional'), 'provisional']], np);
+
+// ladder: buy state of the item sets the best a fact can be
+const stage = (f) => !f.buy.length || f.status === 'standard' ? null : f.status === 'measured' ? 4 : ({ open: 1, 'no-link': 2, picked: 3, home: 3 })[f.buy_state];
+const inStage = (n) => D.facts.filter((f) => stage(f) === n);
+const itemsIn = (bs) => D.shop.filter((s) => s.facts.length && bs.includes(s.buy));
+const RUNGS = [
+  ['r1', '<span class="chip b-open">not picked yet</span>', '<span class="chip s-assumed">assumed</span>', 'No exact product, so nothing to check the numbers against.', itemsIn(['open']), inStage(1)],
+  ['r2', '<span class="chip b-no-link">picked, no product link</span>', '<span class="chip s-assumed">assumed</span>', 'A search page is not a source. Put the exact product page in bom.yaml.', itemsIn(['no-link']), inStage(2)],
+  ['r3', '<span class="chip b-picked">picked, product link</span>', '<span class="chip s-listing">listing</span> → <span class="chip s-datasheet">datasheet</span>', "The shop page gives listing. The maker's drawing gives datasheet, which counts as verified.", itemsIn(['picked', 'home']), inStage(3)],
+  ['r4', '<span class="chip b-picked">arrived, in hand</span>', '<span class="chip s-measured">measured</span>', 'Calipers and a photo with a ruler. Verified, the strongest there is.', [], inStage(4)],
+];
+$('#ladder').innerHTML = RUNGS.map(([cls, b, f, txt, items, facts]) => `<div class="rung ${cls}">
+  <div class="row"><span class="lab">Bought item</span><span>${b}</span></div>
+  <div class="row"><span class="lab">Best the fact can be</span><span>${f}</span></div>
+  <p>${txt}</p>
+  <div class="now">${items.length} item${items.length === 1 ? '' : 's'} here, giving ${facts.length} fact${facts.length === 1 ? '' : 's'}<div class="chips">${facts.map((x) => fchip(x.key)).join('')}</div></div></div>`).join('')
+  + `<p class="hint ladnote">Standard sizes do not depend on which product we pick, so they are verified already: ${D.facts.filter((f) => f.status === 'standard').map((f) => fchip(f.key)).join(' ')}. Facts with nothing to buy (our printer): ${D.facts.filter((f) => !f.buy.length).map((f) => fchip(f.key)).join(' ')}. A red or orange chip in a green box can already move up.</p>`;
+
+// unblock order
+const todo = D.facts.filter((f) => !f.verified).sort((a, b) => b.parts.length - a.parts.length || a.key.localeCompare(b.key));
+const buyLine = (f) => !f.buy.length ? '<span class="ub-buy">Nothing to buy: our own printer.</span>'
+  : `<span class="ub-buy">${bchip(f.buy_state)} ${f.buy.map((k) => `${esc(S[k].short)}${S[k].url ? ` (${linkOf(S[k])})` : ''}`).join(', ')}</span>`;
+$('#ub').innerHTML = todo.map((f) => `<div class="ub-row" tabindex="0" role="button" data-fact="${f.key}">
+    <span><span class="ub-name">${f.key}</span><br><span class="chip s-${f.status}">${f.status}</span></span>
+    <span class="ub-how"><span>${esc(f.how)}${f.key === 'printer_fit' && D.coupon ? ` (${issue(D.coupon)})` : ''}</span>${buyLine(f)}</span>
+    <span class="ub-barw"><span class="ub-bar"><i style="width:${f.parts.length / np * 100}%"></i></span><span class="hint">${f.parts.length ? f.parts.length + ' part' + (f.parts.length > 1 ? 's' : '') : (f.bought.length ? 'bought shapes' : 'checks only')}</span></span>
+    <span class="ub-n">${issue(f.issue)}</span></div>`).join('');
+const toMap = () => $('#mapsec').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+function clicky(el, fn) {
+  el.addEventListener('click', (e) => { if (e.target.closest('a')) return; fn(); });
+  el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } });
+}
+document.querySelectorAll('.ub-row').forEach((r) => clicky(r, () => { select('f', r.dataset.fact); toMap(); }));
+
+// map: bought items, facts, parts
+const unv = D.facts.filter((f) => !f.verified).sort((a, b) => b.parts.length - a.parts.length || a.key.localeCompare(b.key));
+const factsSorted = [...unv, ...D.facts.filter((f) => f.verified)];
+const fIdx = Object.fromEntries(factsSorted.map((f, i) => [f.key, i]));
+const shopSorted = D.shop.filter((s) => s.facts.length).sort((a, b) => Math.min(...a.facts.map((k) => fIdx[k])) - Math.min(...b.facts.map((k) => fIdx[k])) || a.key.localeCompare(b.key));
+const partsSorted = [...D.parts].sort((a, b) => MOD_ORDER.indexOf(a.module) - MOD_ORDER.indexOf(b.module) || a.key.localeCompare(b.key));
+const W = 880, Y0 = 44, sx = 128, fx0 = 296, fx1 = 466, px = 688;
+const sy = {}, fy = {}, py = {};
+const svg = [];
+svg.push(`<text class="colhead" x="4" y="20">Bought items (${shopSorted.length})</text>`);
+svg.push(`<text class="colhead" x="${(fx0 + fx1) / 2}" y="20" text-anchor="middle">Facts (${D.facts.length})</text>`);
+svg.push(`<text class="colhead" x="${px}" y="20">Printed parts (${np})</text>`);
+let y = Y0 + 6;
+svg.push(`<text class="grp" x="${(fx0 + fx1) / 2}" y="${Y0 - 4}" text-anchor="middle">not verified</text>`);
+factsSorted.forEach((f, i) => {
+  if (i === unv.length) { y += 18; svg.push(`<text class="grp" x="${(fx0 + fx1) / 2}" y="${y - 12}" text-anchor="middle">verified</text>`); }
+  fy[f.key] = y; y += 25;
+});
+let hMax = y;
+const sstep = (hMax - Y0 - 6) / shopSorted.length;
+shopSorted.forEach((s, i) => { sy[s.key] = Y0 + 6 + i * sstep; });
+y = Y0;
+let lastMod = null;
+partsSorted.forEach((p) => {
+  if (p.module !== lastMod) { if (lastMod) y += 8; svg.push(`<text class="grp" x="${px}" y="${y - 2}">${p.module}</text>`); y += 8; lastMod = p.module; }
+  py[p.key] = y + 8; y += 22;
+});
+hMax = Math.max(hMax, y) + 8;
+const curve = (x1, y1, x2, y2) => { const m = (x1 + x2) / 2; return `M${x1},${y1} C${m},${y1} ${m},${y2} ${x2},${y2}`; };
+shopSorted.forEach((s) => s.facts.forEach((fk) => svg.push(`<path class="edge sf${s.buy === 'open' ? ' bad' : s.buy === 'no-link' ? ' amber' : ''}" data-s="${esc(s.key)}" data-f="${fk}" d="${curve(sx + 6, sy[s.key], fx0, fy[fk])}"/>`)));
+D.parts.forEach((p) => Object.keys(p.facts).forEach((fk) => { if (fy[fk] !== undefined) svg.push(`<path class="edge fp${F[fk].verified ? '' : ' bad'}" data-f="${fk}" data-p="${p.key}" d="${curve(fx1, fy[fk], px - 6, py[p.key])}"/>`); }));
+const fcol = (f) => f.verified ? 'var(--good)' : (f.status === 'listing' ? 'var(--listing)' : 'var(--bad)');
+const pcol = (p) => ({ confirmed: 'var(--good)', 're-check': 'var(--warn)', provisional: 'var(--idle)' }[p.state]);
+const scol = (s) => ({ open: 'var(--bad)', 'no-link': 'var(--warn)', picked: 'var(--good)', home: 'var(--good)' }[s.buy]);
+shopSorted.forEach((s) => svg.push(`<g class="node" tabindex="0" role="button" aria-label="bought item ${esc(s.short)}, ${BUY[s.buy]}" data-kind="s" data-key="${esc(s.key)}">
+  <rect x="0" y="${sy[s.key] - 11}" width="${sx + 12}" height="22" style="fill:transparent"/>
+  <text x="${sx - 6}" y="${sy[s.key] + 4}" text-anchor="end">${esc(s.short)}</text><circle cx="${sx + 2}" cy="${sy[s.key]}" r="5" style="fill:${scol(s)}"/></g>`));
+factsSorted.forEach((f) => svg.push(`<g class="node" tabindex="0" role="button" aria-label="fact ${f.key}, ${f.status}" data-kind="f" data-key="${f.key}">
+  <rect class="pill" x="${fx0}" y="${fy[f.key] - 10}" width="${fx1 - fx0}" height="20" rx="10" style="stroke:${fcol(f)}"/>
+  <circle cx="${fx0 + 12}" cy="${fy[f.key]}" r="4" style="fill:${fcol(f)}"/><text x="${fx0 + 22}" y="${fy[f.key] + 4}">${f.key}</text></g>`));
+partsSorted.forEach((p) => svg.push(`<g class="node" tabindex="0" role="button" aria-label="part ${p.key}, ${STATE_TXT[p.state]}" data-kind="p" data-key="${p.key}">
+  <rect x="${px - 14}" y="${py[p.key] - 11}" width="${W - px + 14}" height="22" style="fill:transparent"/>
+  <circle cx="${px - 2}" cy="${py[p.key]}" r="5" style="fill:${pcol(p)}"/><text x="${px + 8}" y="${py[p.key] + 4}">${p.key}</text></g>`));
+const map = $('#map');
+map.setAttribute('viewBox', `0 0 ${W} ${hMax}`);
+map.innerHTML = svg.join('');
+map.querySelectorAll('.node').forEach((n) => clicky(n, () => select(n.dataset.kind, n.dataset.key)));
+
+function fmt(v) { return Array.isArray(v) ? JSON.stringify(v) : (typeof v === 'number' ? +v.toFixed(3) : v); }
+function shopBlock(keys) {
+  if (!keys.length) return '<p class="hint">Nothing to buy: this is our own printer.</p>';
+  return '<ul>' + keys.map((k) => { const s = S[k]; return `<li>${esc(s.short)} ${bchip(s.buy)}<br><span class="hint">${esc(s.store)}, ${linkOf(s)}</span></li>`; }).join('') + '</ul>';
+}
+function select(kind, key) {
+  const ss = new Set(), fs = new Set(), ps = new Set();
+  if (kind === 's') { ss.add(key); S[key].facts.forEach((f) => fs.add(f)); }
+  else if (kind === 'f') fs.add(key);
+  else { ps.add(key); Object.keys(P[key].facts).forEach((f) => fs.add(f)); }
+  if (kind !== 'p') fs.forEach((f) => F[f].parts.forEach((p) => ps.add(p)));
+  if (kind !== 's') fs.forEach((f) => F[f].buy.forEach((s) => ss.add(s)));
+  map.querySelectorAll('.edge').forEach((e) => {
+    const on = e.classList.contains('sf') ? ss.has(e.dataset.s) && fs.has(e.dataset.f) && (kind !== 's' || e.dataset.s === key)
+      : fs.has(e.dataset.f) && ps.has(e.dataset.p) && (kind !== 'p' || e.dataset.p === key);
+    e.classList.toggle('on', on);
+  });
+  map.querySelectorAll('.node').forEach((n) => {
+    const set = { s: ss, f: fs, p: ps }[n.dataset.kind];
+    n.classList.toggle('dim', !set.has(n.dataset.key));
+    n.classList.toggle('sel', n.dataset.kind === kind && n.dataset.key === key);
+  });
+  const d = $('#detail');
+  if (kind === 'f') {
+    const f = F[key];
+    d.innerHTML = `<h3 class="mono">${f.key}</h3><p>${esc(f.item)}</p>
+      <p><span class="chip s-${f.status}">${f.status}</span> <span class="hint">${f.verified ? 'verified' : 'not verified'}</span>${f.issue ? ' · verify task ' + issue(f.issue) : ''}</p>
+      <dl class="kv">${Object.entries(f.values).map(([k, v]) => `<dt>${k}</dt><dd>${esc(fmt(v))}</dd>`).join('')}</dl>
+      <p class="hint">Source: ${/^https?:/.test(f.evidence) ? `<a href="${esc(f.evidence)}" target="_blank" rel="noopener">${esc(f.evidence.replace(/^https?:\/\/(www\.)?/, '').slice(0, 60))}</a>` : esc(f.evidence)}</p>
+      <p><b>Bought as:</b></p>${shopBlock(f.buy)}
+      ${!f.verified && f.how ? `<p><b>To verify:</b> ${esc(f.how)}.</p>` : ''}
+      <p><b>${f.parts.length} printed part${f.parts.length === 1 ? '' : 's'} use it:</b></p><div class="chips">${f.parts.map((p) => `<span class="chip p-${P[p].state}">${p}</span>`).join('') || '<span class="hint">none</span>'}</div>`;
+  } else if (kind === 's') {
+    const s = S[key], parts = factParts(s.facts);
+    const next = { open: 'Pick the exact product and put its page link in spec/bom.yaml.', 'no-link': 'Replace the search link with the exact product page in spec/bom.yaml.',
+      picked: 'Find the maker\'s datasheet, or measure it when it arrives.', home: 'Measure it once it is made.' }[s.buy];
+    const hw = s.key === 'hw' ? `<p><b>Includes:</b></p><ul>${D.hardware.map(([i, q]) => `<li>${esc(i)} <span class="hint">x ${q}</span></li>`).join('')}</ul>` : '';
+    d.innerHTML = `<h3>${esc(s.short)}</h3><p>${esc(s.item)}</p>
+      <p>${bchip(s.buy)} <span class="hint">BOM: ${esc(s.status_txt)}</span></p>
+      <dl class="kv"><dt>store</dt><dd>${esc(s.store)}</dd><dt>price</dt><dd>${tl(s.unit)} x ${s.qty} = ${tl(s.total)}</dd><dt>link</dt><dd>${linkOf(s)}</dd></dl>
+      ${s.note ? `<p class="hint">${esc(s.note)}</p>` : ''}
+      <p><b>Next:</b> ${next}</p>
+      <p><b>Gives facts:</b></p><div class="chips">${s.facts.map(fchip).join('')}</div>
+      <p><b>${parts.length} printed part${parts.length === 1 ? '' : 's'} wait on it:</b></p><div class="chips">${parts.map((p) => `<span class="chip p-${P[p].state}">${p}</span>`).join('') || '<span class="hint">none, bought shapes only</span>'}</div>${hw}`;
+  } else {
+    const p = P[key];
+    const lines = Object.entries(p.facts).map(([fk, vs]) => {
+      const f = F[fk];
+      const vals = vs.includes('*') ? 'whole item' : vs.map((v) => `${v} = ${fmt(f.values[v])}`).join(', ');
+      return `<li><span class="mono">${fk}</span> <span class="chip s-${f.status}">${f.status}</span>${f.buy_state && f.buy_state !== 'picked' ? ' ' + bchip(f.buy_state) : ''}<br><span class="hint">${esc(vals)}</span></li>`;
+    }).join('');
+    const next = p.state === 'provisional' ? `Verify ${p.unverified.map((u) => `<span class="mono">${u}</span> ${issue(F[u].issue)}`).join(', ')} first.`
+      : p.state === 're-check' ? `Every input is verified. Do the re-check task ${issue(p.recheck)}.` : 'Confirmed against the current verified values.';
+    d.innerHTML = `<h3 class="mono">${p.key}</h3><p>${esc(p.name)} · ${p.module}</p>
+      <p><span class="chip p-${p.state}">${STATE_TXT[p.state]}</span>${p.design ? ' · design task ' + issue(p.design) : ''}</p>
+      <p><b>Next:</b> ${next}</p><p><b>Uses ${Object.keys(p.facts).length} facts:</b></p><ul>${lines}</ul>`;
+  }
+}
+select('f', todo[0] ? todo[0].key : D.facts[0].key);
+
+// shopping list
+const GROUPS = [['open', 'Not picked yet'], ['no-link', 'Picked, no product link'], ['picked', 'Picked, product link']];
+let filt = 'all';
+function shopTable() {
+  const rows = [];
+  GROUPS.forEach(([b, title]) => {
+    if (filt !== 'all' && filt !== b) return;
+    const list = D.shop.filter((s) => (b === 'picked' ? ['picked', 'home'].includes(s.buy) : s.buy === b))
+      .sort((x, y) => factParts(y.facts).length - factParts(x.facts).length || x.short.localeCompare(y.short));
+    const sum = list.reduce((a, s) => a + s.total, 0);
+    rows.push(`<tr class="grow"><td colspan="6"><h3>${title}</h3><span class="hint">${list.length} items, ${tl(Math.round(sum))}</span></td></tr>`);
+    list.forEach((s) => rows.push(`<tr class="shop" tabindex="0" data-key="${esc(s.key)}">
+      <td class="it"><b>${esc(s.short)}</b><small>${esc(s.item)}</small></td><td>${esc(s.store)}</td>
+      <td class="num">${tl(s.total)}${s.qty > 1 ? `<br><span class="hint">${s.qty} x ${tl(s.unit)}</span>` : ''}</td>
+      <td>${linkOf(s)}</td>
+      <td>${s.facts.map(fchip).join('') || '<span class="hint">not in the 3D design</span>'}</td>
+      <td><span class="hint">${esc(s.status_txt)}</span></td></tr>`));
+  });
+  $('#stb').innerHTML = rows.join('');
+  document.querySelectorAll('tr.shop').forEach((r) => clicky(r, () => { if (S[r.dataset.key].facts.length) { select('s', r.dataset.key); toMap(); } }));
+}
+$('#filters').innerHTML = [['all', `All ${ns}`], ...GROUPS.map(([b, t]) => [b, `${t} (${b === 'picked' ? sc('picked') + sc('home') : sc(b)})`])]
+  .map(([b, t]) => `<button type="button" data-f="${b}" aria-pressed="${b === 'all'}">${t}</button>`).join('');
+document.querySelectorAll('#filters button').forEach((btn) => btn.addEventListener('click', () => {
+  filt = btn.dataset.f;
+  document.querySelectorAll('#filters button').forEach((x) => x.setAttribute('aria-pressed', String(x === btn)));
+  shopTable();
+}));
+shopTable();
+
+// parts table
+const order = { 're-check': 0, provisional: 1, confirmed: 2 };
+$('#ptb').innerHTML = [...D.parts].sort((a, b) => order[a.state] - order[b.state] || b.unverified.length - a.unverified.length || a.key.localeCompare(b.key))
+  .map((p) => `<tr><td class="mono">${p.key}</td><td>${p.module}</td><td><span class="chip p-${p.state}">${STATE_TXT[p.state]}</span></td>
+    <td>${p.unverified.map(fchip).join('') || '<span class="hint">nothing</span>'}</td>
+    <td>${p.recheck ? 're-check ' + issue(p.recheck) : ''}${p.design ? (p.recheck ? ', ' : '') + 'design ' + issue(p.design) : ''}</td></tr>`).join('');
+</script>

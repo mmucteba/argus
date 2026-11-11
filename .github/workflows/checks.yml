@@ -12,6 +12,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  issues: read
 
 concurrency:
   group: checks-${{ github.ref }}
@@ -58,10 +59,13 @@ jobs:
       - name: build the outputs
         if: always()
         continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           python tools/build.py --files
           python tools/pages/make_shop_page.py
           python tools/pages/make_wiring_page.py
+          python tools/pages/make_verification_page.py
 
       - name: keep the outputs
         if: always()

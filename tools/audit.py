@@ -10,6 +10,7 @@ sys.path.insert(0, str(ROOT))
 from argus import registry
 from argus import inputs as INP
 from argus.spec import FACTS, VERIFIED, CONTRACTS
+from argus import bom as BOM
 
 MARK = '<!-- argus-audit -->'
 ALWAYS = {'printer': 'the checks (bed size)'}   # facts used by the checks, not by a shape
@@ -35,6 +36,31 @@ def collect():
     return rows, used, bought
 
 
+def buy_cell(f):
+    rs, worst = BOM.fact_buy(f)
+    if not rs:
+        return 'nothing to buy'
+    names = ', '.join(f"[{r['key']}]({r['url']})" if r['url'] else r['key'] for r in rs)
+    return f"{BOM.BUY_TXT[worst]}: {names}"
+
+
+def buy_lines(f):
+    rs, worst = BOM.fact_buy(f)
+    if not rs:
+        return 'Nothing to buy: this is about our own printer.'
+    L = []
+    for r in rs:
+        link = f"[{'search results' if r['buy'] == 'no-link' else 'product page'}]({r['url']})" if r['url'] else 'no link yet'
+        L.append(f"- `{r['key']}` {r['item']} ({r['store']}): {link}, **{BOM.BUY_TXT[r['buy']]}**")
+    if worst != 'picked':
+        L.append('')
+        L.append('**Pick the product first.** Choose one exact product and put the link to its page (not a search) in '
+                 '`spec/bom.yaml` under the key above. Without a fixed product there is nothing to verify against: the numbers '
+                 'stay `assumed`. With a product page they can become `listing`; the maker\'s drawing makes them `datasheet`; '
+                 'measuring the part when it arrives makes them `measured`.')
+    return '\n'.join(L)
+
+
 def status_md(rows, used, bought, links=None):
     links = links or {}
     nf = len(FACTS)
@@ -45,12 +71,12 @@ def status_md(rows, used, bought, links=None):
          f"**{cnt['re-check']} need a re-check**, **{cnt['provisional']} provisional** (built on unverified facts).", '',
          'How it works: verify a fact (measure it or find the datasheet) and every part that uses it moves on; when all '
          'inputs of a part are verified it gets a re-check task; after the re-check it is confirmed. Rules: REHBER.md.', '',
-         '## Verify these first', '', '| Fact | Status | Parts waiting on it | Task |', '|---|---|---|---|']
+         '## Verify these first', '', '| Fact | Status | Bought as | Parts waiting on it | Task |', '|---|---|---|---|---|']
     todo = [i for i, f in FACTS.items() if f['status'] not in VERIFIED]
     todo.sort(key=lambda i: -len(used.get(i, ())))
     for i in todo:
         parts = ', '.join(sorted(used.get(i, ()))) or ('bought parts only: ' + ', '.join(sorted(bought.get(i, ()))) if bought.get(i) else ALWAYS.get(i, 'not used yet'))
-        L.append(f"| `{i}`: {FACTS[i]['item']} | {FACTS[i]['status']} | {parts} | {links.get(('verify', i), '')} |")
+        L.append(f"| `{i}`: {FACTS[i]['item']} | {FACTS[i]['status']} | {buy_cell(FACTS[i])} | {parts} | {links.get(('verify', i), '')} |")
     L += ['', '## Parts', '', '| Part | State | Waiting on | Task |', '|---|---|---|---|']
     order = {'re-check': 0, 'provisional': 1, 'confirmed': 2}
     for k, r in sorted(rows.items(), key=lambda kv: (order[kv[1]['state']], kv[1]['module'], kv[0])):
@@ -86,6 +112,9 @@ The 3D design uses these numbers, but today they are only **{f['status']}** (`{f
 {extra}
 **Current values** (`spec/facts.yaml`, item `{item}`):
 {vals}
+
+**Bought as:**
+{buy_lines(f)}
 
 **Printed parts that depend on it:** {parts}
 **Bought part shapes that use it:** {bparts}

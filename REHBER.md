@@ -18,6 +18,8 @@ Tasarımdaki her gerçek ölçü (satın aldığımız parçaların boyutları, 
 
 Her parça hangi ölçüleri kullandığını sistem kendisi takip eder. Böylece bir ölçü değişince ondan etkilenen her parça otomatik işaretlenir.
 
+Her ölçü hangi satın alınan parçadan geldiğini de söyler (`buy:`, `spec/bom.yaml` anahtarları). Ürün seçilmemişse ya da sadece bir arama linki varsa ölçü `assumed` kalır. Önce tam ürünü seç ve ürün sayfasının linkini `bom.yaml`'a koy; mağaza sayfası `listing` yapar, üretici çizimi `datasheet`, kendi parçamızı ölçmek `measured`.
+
 **Parçaların durumu:**
 - **provisional:** doğrulanmamış bir ölçü kullanıyor. Tasarımı taslak, görevi `waiting` etiketli.
 - **needs re-check:** bütün ölçüleri doğrulandı, parça baştan kontrol edilip gerekirse yeniden tasarlanacak. Sistem bunun için kendisi görev açar.
