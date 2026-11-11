@@ -11,7 +11,9 @@ This repo is the single source of truth for the machine: every printed part as c
 
 ## See the current machine
 
-Open the **Actions** tab, then the latest green run on `main`, and download **argus-build**. Inside:
+**Project site: https://mmucteba.github.io/argus/** — overview, verification map, 3D viewer, parts and budget, wiring. It rebuilds itself after every push and every morning.
+
+For the files, open the **Actions** tab, then the latest green run on `main`, and download **argus-build**. Inside:
 - `argus-viewer.html`: the 3D model with every part, build steps, checks and prices
 - `ARGUS_T18_print_pack_*.zip`: STL files already oriented for printing
 - `ARGUS_T18_scanner_*.step`: the full assembly for any CAD program

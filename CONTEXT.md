@@ -32,11 +32,13 @@ The current state is **model v0.3, spec version 3**. Decisions and their reasons
 | `tools/audit.py` | Which facts are unverified, which parts depend on them, opens verify and re-check tasks | |
 | `tools/task.py` | Writes a self-contained prompt for one part | |
 | `tools/build.py` | 3D viewer, STEP, STL print pack, drilling template into `build/` | |
-| `tools/pages/` | Parts-and-budget page and wiring page | |
+| `tools/pages/` | Parts-and-budget, wiring and verification pages, and `make_site.py` for the project site | |
 | `test_prints/` | Small prints that test the printer and real parts before the big prints | the task owner |
 | `software/` | Scan software, one folder per module with tests and fakes (plan in software/README.md) | the task owner |
 | `tasks/` | One prompt file per task; each becomes a GitHub issue when it lands on main | integrator |
 | `docs/geo_api.md` | Geometry helper reference | |
+
+**Project site:** https://mmucteba.github.io/argus/ shows the overview, the verification map, the 3D viewer, the parts and the wiring. `.github/workflows/site.yml` rebuilds it after every push to main and after every audit.
 
 Modules: `base`, `light`, `x_axis`, `y_axis`, `slide`, `column`, `optics`, `overview`, `electronics`.
 

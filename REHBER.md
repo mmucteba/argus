@@ -4,6 +4,8 @@ Bu repo tarayıcının tamamı: basılacak her parça ayrı bir dosya, ortak öl
 
 ## Sistem 1 dakikada
 
+**Proje sitesi:** https://mmucteba.github.io/argus/ — genel durum, doğrulama haritası, 3D görüntüleyici, parça listesi ve kablolama. Her değişiklikten ve her sabahki denetimden sonra kendini yeniler.
+
 - **Parçalar:** `parts/<modül>/<parça>.py`. Her basılacak parça tek bir dosya.
 - **Ortak ölçüler:** `spec/` klasöründe. Buna sadece entegratör (Mücteba) dokunur.
 - **Kontrat:** her parçanın kullanabileceği bir kutu (zarf) ve tutması gereken delikler var. Bu kutunun içinde kalıp delikleri koruduğun sürece başkasının parçasını bozamazsın.

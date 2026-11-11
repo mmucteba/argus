@@ -15,7 +15,7 @@ OUT = ROOT / 'build' / 'argus-verification.html'
 HOW = {
     'printer_fit': 'Print the fit coupons, then note which hole fits each real part',
     'm3_insert': 'Pick the insert type, then read the outer diameter and length off the package',
-    't8_nut': 'Link the exact nut page; maker drawing, or measure the nut when it arrives',
+    't8_nut': 'Maker drawing, or measure the flange and holes when the nut arrives',
     'endstop_board': 'Measure the board: hole spacing, fork gap and height',
     'lens': 'Waveshare drawing; measure the barrel and the best-focus height when it arrives',
     'led_ring': 'Datasheet, or measure outer and inner diameter and thickness',
@@ -63,7 +63,7 @@ def issues():
     return out
 
 
-def main():
+def data():
     rows, used, bought = audit.collect()
     iss = issues()
     shop = BOM.by_key()
@@ -87,12 +87,19 @@ def main():
                           unit=r['unit'], qty=r['qty'], total=r['total'], status=r['status'],
                           status_txt=BOM.STATUS_TXT.get(r['status'], r['status']), buy=r['buy'], note=r['note'] or '',
                           facts=[f['key'] for f in facts if key in f['buy']]))
-    data = dict(facts=facts, parts=parts, shop=items, hardware=BOM.HARDWARE, buy_txt=BOM.BUY_TXT, repo=REPO,
+    return dict(facts=facts, parts=parts, shop=items, hardware=BOM.HARDWARE, buy_txt=BOM.BUY_TXT, repo=REPO,
                 board=iss.get(('board', '')), coupon=iss.get(('test-print', 'fit')), date=time.strftime('%d %b %Y'))
+
+
+def write(d):
     tpl = (ROOT / 'tools' / 'pages' / 'verification_template.html').read_text(encoding='utf-8')
     OUT.parent.mkdir(exist_ok=True)
-    OUT.write_text(tpl.replace('/*__DATA__*/null', json.dumps(data, ensure_ascii=False)), encoding='utf-8')
+    OUT.write_text(tpl.replace('/*__DATA__*/null', json.dumps(d, ensure_ascii=False)), encoding='utf-8')
     print('wrote', OUT.relative_to(ROOT))
+
+
+def main():
+    write(data())
 
 
 if __name__ == '__main__':

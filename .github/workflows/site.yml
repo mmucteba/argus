@@ -1,0 +1,87 @@
+# project site on github pages: overview, verification map, 3d viewer, parts and wiring
+# rebuilds after every push to main and after every audit run (so also every morning)
+# one time setup: settings, pages, source: github actions
+name: site
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: [audit]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: site
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      pages: ${{ steps.pages.outputs.on }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 20
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+      - name: install
+        run: pip install -r requirements.txt
+      - name: checks
+        continue-on-error: true
+        run: python tools/check.py --report build/report.md --json build/checks.json
+      - name: pages
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python tools/build.py
+          python tools/pages/make_shop_page.py
+          python tools/pages/make_wiring_page.py
+      - name: site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python tools/pages/make_site.py
+      - name: is pages on
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/${{ github.repository }}/pages" > /dev/null 2>&1; then
+            echo "on=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "on=false" >> "$GITHUB_OUTPUT"
+            echo "GitHub Pages is off. Turn it on once: Settings, Pages, Source: GitHub Actions. The site is kept as the run artifact argus-site until then." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - name: keep the site as a download too
+        uses: actions/upload-artifact@v4
+        with:
+          name: argus-site
+          path: site
+          include-hidden-files: true
+          retention-days: 14
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.pages == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
