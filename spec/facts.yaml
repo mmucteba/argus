@@ -204,6 +204,6 @@ power_parts:
   item: power side parts for the power panel (DC jack, KCD1 switch, LM2596, Wago 221-413, 74HCT125 board)
   buy: [dcjack, switch, buck, wago, shifter, fuse]
   status: assumed
-  evidence: rough sizes, measure when bought
-  values: {jack_l: 30.0, jack_w: 15.0, jack_h: 15.0, switch_cut_w: 19.0, switch_cut_h: 13.0, buck_l: 43.0, buck_w: 21.0,
-           buck_h: 14.0, wago_l: 20.0, wago_w: 19.0, wago_h: 13.0, shifter_l: 30.0, shifter_w: 20.0}
+  evidence: buck 43 x 21.5 x 13.5 and wago 18.6 x 18.8 x 8.4 from the product pages; jack, switch and shifter rough; measure all when bought
+  values: {jack_l: 30.0, jack_w: 15.0, jack_h: 15.0, switch_cut_w: 19.0, switch_cut_h: 13.0, buck_l: 43.0, buck_w: 21.5,
+           buck_h: 13.5, wago_l: 18.6, wago_w: 18.8, wago_h: 8.4, shifter_l: 30.0, shifter_w: 20.0}

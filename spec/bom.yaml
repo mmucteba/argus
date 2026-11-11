@@ -102,11 +102,11 @@ items:
   step: 2, 11
   store: Robotistan
   item: LM2596 voltaj düşürücü 3 A
-  url: https://www.robotistan.com/arama?q=LM2596
-  unit_tl: 69.24
+  url: https://www.robotistan.com/mini-adjustable-3a-step-down-voltage-regulator-lm2596
+  unit_tl: 69.74
   qty: 1
   status: chosen
-  note: set to 5.0 V before connecting; LED card, ring, endstops
+  note: product code 11750, 4-35 V in, 1.25-30 V out, 3 A, 43 x 21.5 x 13.5 mm; set to 5.0 V before connecting; LED card, ring, endstops
 - key: coupling
   step: 4, 6
   store: Robotistan
@@ -183,11 +183,11 @@ items:
   step: '11'
   store: Robotistan
   item: DC güç fişi 2.1 mm dişi, vidalı klemens
-  url: https://www.robotistan.com/arama?q=dc+g%C3%BC%C3%A7+fi%C5%9Fi+2.1mm
-  unit_tl: 10.32
+  url: https://www.robotistan.com/dc-guc-fisi-21mm-disi-vidali-klemens
+  unit_tl: 10.4
   qty: 1
   status: chosen
-  note: 2.1 mm, matches the adapter plug
+  note: DC2.1-F2, 5.5 x 2.1 mm, matches the adapter plug; cable type with a screw terminal, not panel mount, so the panel holds it in a pocket; body size not listed
 - key: switch
   step: '11'
   store: Robotistan
@@ -298,13 +298,13 @@ items:
   note: right after the DC jack, before the switch
 - key: wago
   step: '11'
-  store: tbd
-  item: Wago 221-413 klemens (or a small terminal block)
-  url: https://www.hepsiburada.com/ara?q=wago+221-413
-  unit_tl: 30
-  qty: 3
-  status: later
-  note: 12 V +, 5 V +, GND distribution
+  store: Hepsiburada
+  item: Wago 221-413 klemens, 10'lu paket (seller EMİRELEKTRİK)
+  url: https://www.hepsiburada.com/wago-221-413-3-lu-cok-amacli-buat-klemensi-10-li-pm-HBC00008DZHBM
+  unit_tl: 337.56
+  qty: 1
+  status: chosen
+  note: we use 3 (12 V +, 5 V +, GND); 0.2-4 mm2, 32 A, 18.8 x 8.4 x 18.6 mm (w x h x d), levers open upward
 - key: wiring
   step: '11'
   store: tbd
