@@ -47,7 +47,7 @@ t8_nut:
   item: T8 anti-backlash spring nut, lead 8, Robolink
   buy: ['T8 nut']
   status: assumed
-  evidence: typical size, not checked
+  evidence: product picked (robolinkmarket.com/t8-yayli-trapez-somun, lead 8, start 4) but the page gives no flange or hole sizes; typical sizes until measured
   values: {flange_d: 22.0, flange_t: 3.5, body_d: 10.2, body_len: 15.0, spring_d: 13.0, spring_len: 9.0, hole_circle: 16.0,
            hole_d: 3.4}
 

@@ -48,11 +48,11 @@ items:
   step: 4, 6
   store: Robolink
   item: T8 yaylı trapez somun, lead 8 (start 4)
-  url: https://www.robolinkmarket.com/arama?q=t8+yayl%C4%B1+trapez+somun
-  unit_tl: 151.5
+  url: https://www.robolinkmarket.com/t8-yayli-trapez-somun
+  unit_tl: 153.0
   qty: 2
   status: chosen
-  note: pick "T8 Yaylı Trapez Somun" (lead 8), NOT the 2 hatve one
+  note: SKU RLB0B12-1704, start 4, pitch 2, lead 8; upper nut + lower nut + spring; matches the lead 8 screw
 - key: endstop
   step: 4, 6
   store: Robolink

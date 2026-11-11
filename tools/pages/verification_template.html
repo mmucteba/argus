@@ -285,7 +285,7 @@ $('#ladder').innerHTML = RUNGS.map(([cls, b, f, txt, items, facts]) => `<div cla
   <div class="row"><span class="lab">Best the fact can be</span><span>${f}</span></div>
   <p>${txt}</p>
   <div class="now">${items.length} item${items.length === 1 ? '' : 's'} here, giving ${facts.length} fact${facts.length === 1 ? '' : 's'}<div class="chips">${facts.map((x) => fchip(x.key)).join('')}</div></div></div>`).join('')
-  + `<p class="hint ladnote">Standard sizes do not depend on which product we pick, so they are verified already: ${D.facts.filter((f) => f.status === 'standard').map((f) => fchip(f.key)).join(' ')}. Facts with nothing to buy (our printer): ${D.facts.filter((f) => !f.buy.length).map((f) => fchip(f.key)).join(' ')}. A red or orange chip in a green box can already move up.</p>`;
+  + `<p class="hint ladnote">Standard sizes do not depend on which product we pick, so they are verified already: ${D.facts.filter((f) => f.status === 'standard').map((f) => fchip(f.key)).join(' ')}. Facts with nothing to buy (our printer): ${D.facts.filter((f) => !f.buy.length).map((f) => fchip(f.key)).join(' ')}. A red or orange chip in a green box has its product fixed: a datasheet or a measurement is next.</p>`;
 
 // unblock order
 const todo = D.facts.filter((f) => !f.verified).sort((a, b) => b.parts.length - a.parts.length || a.key.localeCompare(b.key));
