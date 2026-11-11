@@ -195,6 +195,19 @@ def main():
             lines += ['', f'Total about {tg:.0f} g of filament and {th:.0f} h of printing.', '',
                       'Screws, inserts and small parts for the whole scanner:']
             lines += [f'  {n} x {k}' for k, n in hw.items()]
+            import importlib
+            tps = [f for f in sorted((ROOT / 'test_prints').glob('*.py')) if not f.stem.startswith('_')]
+            if tps:
+                lines += ['', 'Test prints (folder test_prints/), print these first:']
+            for f in tps:
+                m = importlib.import_module(f'test_prints.{f.stem}')
+                sh = m.build()
+                sh = sh[0] if isinstance(sh, tuple) else sh
+                fn = f'{f.stem}.stl'
+                cq.exporters.export(oriented(sh, m.META.get('orient', 'zmin')), f'{OUT}/stl_{v}/{fn}', tolerance=0.02,
+                                    angularTolerance=0.12)
+                z.write(f'{OUT}/stl_{v}/{fn}', f'test_prints/{fn}')
+                lines.append(f"  test_prints/{fn}: {m.META.get('note', '')}")
             z.writestr('README.txt', '\n'.join(lines) + '\n')
         print('print pack', len(done), 'parts')
         n = drilling_template(parts, f'{OUT}/ARGUS_T18_base_drilling_template_{v}_A3.pdf')

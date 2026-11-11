@@ -30,7 +30,9 @@ The current state is **model v0.3, spec version 3**. Decisions and their reasons
 | `tools/task.py` | Writes a self-contained prompt for one part | |
 | `tools/build.py` | 3D viewer, STEP, STL print pack, drilling template into `build/` | |
 | `tools/pages/` | Parts-and-budget page and wiring page | |
-| `software/` | Scan software, not started yet (plan in software/README.md) | |
+| `test_prints/` | Small prints that test the printer and real parts before the big prints | the task owner |
+| `software/` | Scan software, one folder per module with tests and fakes (plan in software/README.md) | the task owner |
+| `tasks/` | One prompt file per task; each becomes a GitHub issue when it lands on main | integrator |
 | `docs/geo_api.md` | Geometry helper reference | |
 
 Modules: `base`, `light`, `x_axis`, `y_axis`, `slide`, `column`, `optics`, `overview`, `electronics`.

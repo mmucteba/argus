@@ -3,7 +3,8 @@
 import json, pathlib, subprocess, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-COLORS = {'design': '5a3ea6', 'fable': 'c62f2f', 'software': '1b78a3', 'change-request': 'd47108'}
+COLORS = {'design': '5a3ea6', 'fable': 'c62f2f', 'software': '1b78a3', 'change-request': 'd47108', 'waiting': 'bfbfbf',
+          'research': '2f7d4f', 'test-print': 'd9c062'}
 
 
 def gh(*args, **kw):

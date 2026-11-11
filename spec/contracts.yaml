@@ -1,7 +1,7 @@
 # contracts: one entry per printed part
 # envelope = the box (x0 x1 y0 y1 z0 z1, assembled position) the part may use; the whole-machine check catches the rest
 # built_for_spec = spec_version the part was last checked against; the checks warn when the spec moves on
-# status: ok, needs-measurement, redesign, in-progress
+# status: ok, new, needs-measurement, redesign, in-progress
 # the holes a part must have are listed in interfaces.yaml
 # only the integrator edits this file
 led_tower:
@@ -181,3 +181,11 @@ uno_tray:
   envelope: [-133, 13, -115, -55, -1, 10]
   source: model v0.3, dimensions from listings
   open: ''
+power_panel:
+  module: electronics
+  name: Power panel
+  status: new
+  built_for_spec: 3
+  envelope: [-135, -40, 96, 152, 0, 45]
+  source: new part, placeholder plate
+  open: 'Design it: holds DC jack, switch, fuse, buck, 74HCT125 board and Wagos.'

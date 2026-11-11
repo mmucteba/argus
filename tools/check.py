@@ -4,7 +4,7 @@
 #   --report build/report.md          also write a markdown report (ci posts it on the pull request)
 #   --scope origin/main               also list files changed against a branch and flag edits outside one part folder
 # exit code 1 when anything fails
-import argparse, json, pathlib, subprocess, sys, time
+import argparse, importlib, json, pathlib, subprocess, sys, time
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from argus import registry
@@ -46,7 +46,13 @@ def main():
         s = scope_items(a.scope)
         items += s[0]
     from checks.assembly import support_report
-    if a.part:
+    tp = {f.stem: f for f in sorted((ROOT / 'test_prints').glob('*.py')) if not f.stem.startswith('_')}
+    for k in tp:
+        if not a.part or a.part == k:
+            items += part_checks.run_test_print(k, importlib.import_module(f'test_prints.{k}'), support_report)
+    if a.part in tp:
+        recs = []
+    elif a.part:
         recs = registry.build(only=a.part)
     else:
         recs = registry.build()
@@ -57,7 +63,7 @@ def main():
                           detail=f'spec/contracts.yaml lists {k} but parts/{CONTRACTS[k]["module"]}/{k}.py is missing.'))
     for r in printed:
         items += part_checks.run(r, support_report)
-    if not a.part and not a.no_machine:
+    if not a.part and not a.no_machine:  # whole machine
         from checks import assembly
         res, _ = assembly.run()
         data = res['data']

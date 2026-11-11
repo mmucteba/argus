@@ -105,3 +105,28 @@ def run(rec, support_report=None):
     item('spec', 'Built for the current spec', 'PASS' if st == SPEC_VERSION else 'WARN', f'spec {st}, now {SPEC_VERSION}',
          'The spec changed since this part was last checked. Re-check its interfaces, then the integrator bumps built_for_spec.')
     return items
+
+
+def run_test_print(key, mod, support_report=None):
+    # test prints only need to be one solid, fit the bed and print without supports
+    items = []
+    meta = mod.META
+    shape = mod.build()
+    shape = shape[0] if isinstance(shape, tuple) else shape
+
+    def item(id_, title, status, value, detail):
+        items.append(dict(id=f'test_prints.{key}.{id_}', part=key, title=title, status=status, value=value, detail=detail))
+
+    solids = shape.Solids()
+    ok = shape.isValid() and len(solids) == 1
+    item('solid', 'One valid solid', 'PASS' if ok else 'FAIL', f'{len(solids)} solid(s)', 'A test print must be one piece.')
+    s = oriented(shape, meta.get('orient', 'zmin'))
+    ob = s.BoundingBox()
+    bx, by_, bz = P['bed']
+    fits = (ob.xlen <= bx and ob.ylen <= by_ and ob.zlen <= bz) or (ob.ylen <= bx and ob.xlen <= by_ and ob.zlen <= bz)
+    item('bed', 'Fits the printer bed', 'PASS' if fits else 'FAIL', f'{ob.xlen:.0f} x {ob.ylen:.0f} x {ob.zlen:.0f} mm', '')
+    if support_report:
+        _, bad = support_report(shape, meta.get('orient', 'zmin'))
+        item('supports', 'Prints without supports', 'WARN' if bad else 'PASS', f'{len(bad)} overhang area(s)' if bad else 'none',
+             'Downward faces flatter than 42 degrees need supports.')
+    return items
