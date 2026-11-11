@@ -1,6 +1,6 @@
 # levelling springs, glass slide, coverslip
 from argus.geo import *
-from argus.spec import P, pat
+from argus.spec import F, P, pat
 
 
 def add_bought(add):
@@ -8,7 +8,9 @@ def add_bought(add):
     zf = P['z_focal']
     for x, y in pat('levelling'):
         add('Levelling spring', tube(3, 1.7, (x, y, c1), (x, y, h0)), 'Y', 4, 'mech', 'Slide holder', 7, 'steel', mass=0.5)
-    add('Glass slide', box(-37.5, 37.5, -12.5, 12.5, P['z_slide_bot'], zf), 'Y', 4, 'mech', 'Slide holder', 7, 'glass',
+    sl, sw = P['slide_l'] / 2, P['slide_w'] / 2
+    add('Glass slide', box(-sl, sl, -sw, sw, P['z_slide_bot'], zf), 'Y', 4, 'mech', 'Slide holder', 7, 'glass',
         density=P['rho_glass'], buy='slide')
-    add('Coverslip', box(-34, 16, -12, 12, zf, P['z_cover_top']), 'Y', 4, 'mech', 'Slide holder', 7, 'glass',
+    c = F.coverslip
+    add('Coverslip', box(-34, -34 + c.l, -c.w / 2, c.w / 2, zf, P['z_cover_top']), 'Y', 4, 'mech', 'Slide holder', 7, 'glass',
         density=P['rho_glass'])

@@ -10,6 +10,31 @@ Bu repo tarayıcının tamamı: basılacak her parça ayrı bir dosya, ortak öl
 - **Kontroller:** her gönderimde kendiliğinden çalışır. Yeşil tamam demek. Kırmızıysa rapor neyin, nerede, neden bozulduğunu söyler.
 - **Görevler:** Issues sekmesinde. Her görevin içinde, herhangi bir AI'a yapıştırılabilecek hazır bir prompt var.
 
+## Önce doğrula, sonra tasarla
+
+Tasarımdaki her gerçek ölçü (satın aldığımız parçaların boyutları, yazıcının delikleri nasıl bastığı) `spec/facts.yaml` dosyasında, kaynağıyla birlikte duruyor:
+- **Zayıf kaynaklar:** `assumed` (tahmin) ve `listing` (mağaza sayfası). Bunlar doğrulanmış sayılmaz.
+- **Doğrulanmış sayılanlar:** `datasheet` (üretici çizimi), `standard` (standart ölçü) ve `measured` (kendi parçamızı kumpasla ölçtük).
+
+Her parça hangi ölçüleri kullandığını sistem kendisi takip eder. Böylece bir ölçü değişince ondan etkilenen her parça otomatik işaretlenir.
+
+**Parçaların durumu:**
+- **provisional:** doğrulanmamış bir ölçü kullanıyor. Tasarımı taslak, görevi `waiting` etiketli.
+- **needs re-check:** bütün ölçüleri doğrulandı, parça baştan kontrol edilip gerekirse yeniden tasarlanacak. Sistem bunun için kendisi görev açar.
+- **confirmed:** doğrulanmış ölçülere göre kontrol edildi. Bir ölçü sonradan değişirse kendiliğinden tekrar "needs re-check" olur.
+
+**Verify (doğrulama) görevi nasıl yapılır:**
+1. `verify` etiketli bir görev al, kendini ata.
+2. Parça elindeyse kumpasla ölç ve cetvelli fotoğraf çek. Elinde değilse üreticinin datasheet'ini bul (mağaza sayfası yetmez); AI'a görevi yapıştırıp aratabilirsin.
+3. Kanıtı `evidence/<parça>/` klasörüne koy (fotoğraf veya PDF), ya da linki yaz.
+4. `spec/facts.yaml` dosyasında o parçanın `values`, `status`, `evidence` alanlarını güncelle, `by` (adın) ve `date` ekle. Pull request aç.
+
+Bu yüzden bir tasarım görevi `waiting` etiketliyse, önce altındaki yorumda listelenen verify görevlerini yap.
+
+**Her gün sabah 07:23'te otomatik denetim çalışır:**
+- verify ve re-check görevlerini açar, biteni kapatır
+- **Status board** issue'sunu günceller: hangi ölçü eksik, hangi parça onu bekliyor ve ikisinin bağlantı grafiği
+
 ## Görev almak
 
 1. **Issues** sekmesinde `design` etiketli, kimseye atanmamış bir görev seç.

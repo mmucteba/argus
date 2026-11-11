@@ -1,6 +1,6 @@
 # pi mount: four standoffs for the raspberry pi 3b+
 from argus.geo import *
-from argus.spec import pat
+from argus.spec import P, pat
 
 META = dict(name='Pi mount', group='F', layer=0, sub='Electronics', step=11, color='frame', orient='zmin',
             note='Four standoffs for the Pi 3B+ (58 x 49 mm hole pattern, M2.5 screws tap into 2.2 mm holes).',
@@ -12,5 +12,5 @@ def build():
     for x, y in pat('pi_mount'):
         pm = pm.fuse(cyl(3, (x, y, 3), (x, y, 8)))
     base = [(122, 92), (122, 144), (42, 146), (104, 146)]
-    pm = cut(pm, *[cyl(1.1, (x, y, 3), (x, y, 8.1)) for x, y in pat('pi_mount')], *[wood_hole(x, y, 3, 0) for x, y in base])
+    pm = cut(pm, *[cyl(P['m25_tap_d'] / 2, (x, y, 3), (x, y, 8.1)) for x, y in pat('pi_mount')], *[wood_hole(x, y, 3, 0) for x, y in base])
     return pm, [(x, y, 'Pi mount') for x, y in base]

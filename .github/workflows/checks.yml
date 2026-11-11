@@ -5,6 +5,8 @@ on:
   pull_request:
   push:
     branches: [main]
+  schedule:
+    - cron: '41 4 * * *'   # every day 07:41 istanbul, catches anything that slipped through
   workflow_dispatch:
 
 permissions:

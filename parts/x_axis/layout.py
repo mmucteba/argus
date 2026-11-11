@@ -6,4 +6,3 @@ SY, SZ = pat('x_screw')[0]                       # lead screw centre (y, z)
 L, R = P['xblk_l'], P['xblk_r']                  # inner faces of the end blocks
 EX, EY = P['x_endstop']                          # endstop sensor centre
 ROD_X = (L - 10, R + 10)                         # rod ends
-CPL = (L - 14 + 12, L - 14 + 37)                 # coupling span

@@ -1,27 +1,29 @@
 # argus t18 shared parameters
 # units mm g s, z up, optical axis at x=0 y=0, base plate top at z=0
-# every part reads its numbers from here or from interfaces.yaml, never hard-code a value another part depends on
+# every part reads its numbers from here, interfaces.yaml or facts.yaml, never hard-code a value another part depends on
+# a value can be a formula of facts (facts.yaml) and earlier params, like "lens.d / 2"; then the checks know which parts
+# depend on which fact
 # bump spec_version on every change; parts built for an older version get flagged by the checks
 spec_version: 3
 model_version: v0.3
-bed: [220.0, 220.0, 250.0]
+bed: "printer.bed"
 
 # slide and optics
-slide_l: 75.0
-slide_w: 25.0
-slide_t: 1.0
-cover_t: 0.17
+slide_l: "slide.l"
+slide_w: "slide.w"
+slide_t: "slide.t"
+cover_t: "coverslip.t"
 label_len: 20.0
-mag: 1.8              # waveshare zoom lens at full zoom
-na: 0.04              # not published, estimate
-wd: 55.0              # working distance at 1.8x, from the listing, measure on arrival
-lens_len: 112.0
-lens_r: 19.5
-lens_thread: 4.0
-px_native: 1.55
+mag: "lens.mag_max"           # waveshare zoom lens at full zoom
+na: "lens.na_est"             # not published, estimate
+wd: "lens.wd_max_zoom"        # working distance at 1.8x, from the listing, measure on arrival
+lens_len: "lens.length"
+lens_r: "lens.d / 2"
+lens_thread: "lens.thread_len"
+px_native: "hq_camera.px"
 binning: 2
-sensor_w: 6.287
-sensor_h: 4.712
+sensor_w: "hq_camera.sensor_w"
+sensor_h: "hq_camera.sensor_h"
 wavelength: 0.55
 pupil_r: 4.0
 
@@ -29,10 +31,10 @@ pupil_r: 4.0
 x_travel: [-25.0, 70.0]
 y_travel: [-15.0, 15.0]
 z_travel: [-5.0, 5.0]
-lead: 8.0
+lead: "t8_screw.lead"
 steps_rev: 200
 microsteps: 16
-m4_pitch: 0.7
+m4_pitch: "m4_rod.pitch"
 byj_halfsteps_rev: 4096
 nema_hold_ncm: 40.0
 nema_pullout_ncm: 15.0
@@ -60,9 +62,15 @@ e_pla: 2300.0
 h_per_g: 0.11
 min_wall: 1.2
 min_gap: 1.0
-insert_d: 4.0       # m3 heat-set insert hole, change to match the inserts you buy
-m3_clear_d: 3.4     # m3 bolt clearance hole
-wood_screw_d: 4.3   # hole for 4 mm wood screws into the plywood
+# printed hole sizes, from the inserts we buy and the fit coupon print
+insert_d: "m3_insert.hole_d"
+m3_clear_d: "printer_fit.m3_clear"
+m4_clear_d: "printer_fit.m4_clear"
+m25_tap_d: "printer_fit.m25_tap"
+wood_screw_d: "printer_fit.wood_screw"
+rod_bore_d: "printer_fit.rod_bore"
+lm8uu_seat_d: "printer_fit.lm8uu_seat"
+bearing_seat_d: "printer_fit.bearing_seat"
 
 # layout
 base: [-137.0, 163.0, -117.0, 153.0]   # x0 x1 y0 y1 of the plywood

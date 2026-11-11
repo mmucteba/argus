@@ -1,0 +1,180 @@
+# facts: real-world numbers about the parts we buy and the printer we print on
+# params.yaml holds our design choices; this file holds what the world is, and how sure we are
+#
+# status, from weakest to strongest:
+#   assumed    our guess
+#   listing    a shop page says so
+#   datasheet  the maker's drawing or datasheet
+#   standard   an iso or industry standard size (m3 nut, 608 bearing, c mount)
+#   measured   someone measured our own part with calipers
+# only datasheet, standard and measured count as verified; a part that uses anything else is provisional
+#
+# to verify an item: measure it or find the datasheet, put the proof in evidence/<item>/ (photo with a ruler,
+# pdf) or a link in evidence, update values and status, fill by and date, open a pull request
+# the code reads these as F.<item>.<value>; never type these numbers into a part
+
+rod_8mm:
+  item: 8 mm hardened rod, Robolink, 250 mm
+  status: listing
+  evidence: https://www.robolinkmarket.com/8mm-krom-kapli-induksiyonlu-mil-250mm
+  values: {d: 8.0, length: 250.0}
+
+lm8uu:
+  item: LM8UU linear bearing, PRC 10-pack
+  status: datasheet
+  evidence: LM8UU standard size (THK LM8UU catalogue, 15 x 24 mm, bore 8)
+  values: {od: 15.0, length: 24.0, bore: 8.0}
+
+nema17:
+  item: 17HS4401 NEMA17 stepper
+  status: datasheet
+  evidence: NEMA17 frame (42.3 mm, 31 mm hole spacing, 22 mm boss, 5 mm shaft), 17HS4401 length 40 mm
+  values: {body: 42.3, length: 40.0, hole_spacing: 31.0, boss_d: 22.0, boss_h: 2.0, shaft_d: 5.0, shaft_len: 22.0}
+
+t8_screw:
+  item: T8 lead screw 400 mm, lead 8, Robolink
+  status: listing
+  evidence: https://www.robolinkmarket.com/3d-yazici-vidali-mil-somun-400mm-trapez-t8-8mm
+  values: {d: 8.0, lead: 8.0, length: 400.0}
+
+t8_nut:
+  item: T8 anti-backlash spring nut, lead 8, Robolink
+  status: assumed
+  evidence: typical size, not checked
+  values: {flange_d: 22.0, flange_t: 3.5, body_d: 10.2, body_len: 15.0, spring_d: 13.0, spring_len: 9.0, hole_circle: 16.0,
+           hole_d: 3.4}
+
+bearing_608:
+  item: 608ZZ ball bearing
+  status: standard
+  evidence: ISO 15, 608 = 22 x 8 x 7 mm
+  values: {od: 22.0, bore: 8.0, w: 7.0}
+
+coupling:
+  item: flexible coupling 5 x 8 mm D19L25, Robotistan
+  status: listing
+  evidence: https://www.robotistan.com/esnek-kaplin-5-8mm-d19l25
+  values: {d: 19.0, length: 25.0}
+
+endstop_board:
+  item: optical endstop board (TCST2103 type), Robolink
+  status: assumed
+  evidence: listing gives 32 x 10 x 21 mm overall; hole spacing and fork sizes are guesses
+  values: {pcb_w: 10.5, pcb_l: 33.0, pcb_t: 1.6, hole_spacing: 19.0, fork_w: 6.3, fork_l: 24.5, base_h: 2.8, fork_h: 8.0,
+           gap: 3.1}
+
+byj48:
+  item: 28BYJ-48 geared stepper, 5 V
+  status: datasheet
+  evidence: 28BYJ-48 drawing (body 28 x 19, ears 35 mm apart, shaft 8 mm off centre, 5 mm shaft with 3 mm flats)
+  values: {body_d: 28.0, body_h: 19.0, ear_spacing: 35.0, ear_hole_d: 4.2, shaft_offset: 8.0, shaft_d: 5.0, shaft_flats: 3.0,
+           boss_d: 9.0, boss_h: 1.5, shaft_len: 8.0}
+
+m4_rod:
+  item: M4 threaded rod
+  status: standard
+  evidence: ISO 261, M4 x 0.7
+  values: {d: 4.0, pitch: 0.7}
+
+m4_nut:
+  item: M4 hex nut
+  status: standard
+  evidence: ISO 4032, 7 mm across flats, 3.2 mm thick
+  values: {af: 7.0, h: 3.2}
+
+m3_nut:
+  item: M3 hex nut
+  status: standard
+  evidence: ISO 4032, 5.5 mm across flats, 2.4 mm thick
+  values: {af: 5.5, h: 2.4}
+
+m3_insert:
+  item: M3 heat-set insert (type not bought yet)
+  status: assumed
+  evidence: the hole size depends on the insert we buy; write the outer diameter and length from the package
+  values: {hole_d: 4.0, length: 5.7}
+
+printer_fit:
+  item: how our printer makes holes (from the fit coupon print, issue 6)
+  status: assumed
+  evidence: not printed yet
+  values: {rod_bore: 8.1, lm8uu_seat: 15.1, bearing_seat: 22.16, m3_clear: 3.4, m4_clear: 4.4, m25_tap: 2.2, wood_screw: 4.3}
+
+printer:
+  item: the printer the team will use
+  status: assumed
+  evidence: 220 x 220 x 250 mm is a common size, check the real printer
+  values: {bed: [220.0, 220.0, 250.0]}
+
+lens:
+  item: Waveshare 100X industrial microscope lens 0.12-1.8x, C mount
+  status: listing
+  evidence: https://www.waveshare.com/product/raspberry-pi/100x-microscope-lens-for-pi.htm (39 x 112 mm, 202 g, WD 55-285 mm)
+  values: {d: 39.0, length: 112.0, thread_len: 4.0, wd_max_zoom: 55.0, mag_max: 1.8, na_est: 0.04}
+
+hq_camera:
+  item: Raspberry Pi HQ Camera, C/CS mount (SC0261)
+  status: datasheet
+  evidence: Raspberry Pi HQ camera mechanical drawing (38 x 38 mm board); C mount flange 17.526 mm
+  values: {board: 38.0, mount_od: 36.0, mount_id: 30.0, flange_focal: 17.526, px: 1.55, sensor_w: 6.287, sensor_h: 4.712}
+
+led_ring:
+  item: WS2812 24-LED ring, Robotistan
+  status: listing
+  evidence: https://www.robotistan.com/neopixel-24lu-halka (86.5 / 71.5 mm, 3.5 mm PCB)
+  values: {od: 86.5, id: 71.5, t: 3.5}
+
+led_card:
+  item: Sürücülü 3 W power LED card, Robotistan
+  status: listing
+  evidence: https://www.robotistan.com/suruculu-3w-power-led-karti (23 x 30 mm); thickness, LED position and holes unknown
+  values: {w: 23.0, l: 30.0, t: 1.6}
+
+heatsink:
+  item: aluminium heatsink 20 x 15 x 10 mm, robotus
+  status: listing
+  evidence: https://www.robotus.net/aluminum-heatsink-20x10x15-sogutucu-blok
+  values: {w: 20.0, l: 15.0, h: 10.0}
+
+diffuser:
+  item: diffuser disc (baking paper now, opal acrylic later)
+  status: assumed
+  evidence: 28 mm disc, 3 mm assumed for the acrylic
+  values: {d: 28.0, t: 3.0}
+
+slide:
+  item: glass microscope slide
+  status: standard
+  evidence: common 75 x 25 x 1 mm slide (ISO 8037-1 allows 75-76 x 25-26)
+  values: {l: 75.0, w: 25.0, t: 1.0}
+
+coverslip:
+  item: coverslip no. 1.5
+  status: standard
+  evidence: 0.17 mm, 24 x 50 mm
+  values: {t: 0.17, l: 50.0, w: 24.0}
+
+uno:
+  item: Arduino Uno R3 (CH340 clone) with CNC Shield V3
+  status: datasheet
+  evidence: Arduino Uno R3 drawing, 68.6 x 53.3 mm, hole positions from the lower left corner
+  values: {pcb_l: 68.6, pcb_w: 53.3, holes: [[13.97, 2.54], [15.24, 50.8], [66.04, 7.62], [66.04, 35.56]]}
+
+pi3b:
+  item: Raspberry Pi 3 Model B+
+  status: datasheet
+  evidence: Raspberry Pi 3B+ mechanical drawing, 85 x 56 mm, holes 58 x 49 mm
+  values: {pcb_l: 85.0, pcb_w: 56.0, holes: [[3.5, 3.5], [61.5, 3.5], [3.5, 52.5], [61.5, 52.5]]}
+
+overview_camera:
+  item: overview USB camera (not picked, issue 11)
+  status: assumed
+  evidence: placeholder from the Pi Camera Module 3 shape
+  values: {board_w: 25.0, board_l: 24.0, holes: [[-10.5, -6.25], [-10.5, 6.25], [10.5, -6.25], [10.5, 6.25]], hole_d: 2.0}
+
+power_parts:
+  item: power side parts for the power panel (DC jack, KCD1 switch, LM2596, Wago 221-413, 74HCT125 board)
+  status: assumed
+  evidence: rough sizes, measure when bought
+  values: {jack_l: 30.0, jack_w: 15.0, jack_h: 15.0, switch_cut_w: 19.0, switch_cut_h: 13.0, buck_l: 43.0, buck_w: 21.0,
+           buck_h: 14.0, wago_l: 20.0, wago_w: 19.0, wago_h: 13.0, shifter_l: 30.0, shifter_w: 20.0}

@@ -11,6 +11,7 @@ META = dict(name='Slide holder', group='Y', layer=4, sub='Slide holder', step=7,
 def build():
     h0, h1 = P['holder_z']
     hold = box(-46, 46, -21, 21, h0, h1)
-    return cut(hold, box(-38, 38, -13, 13, P['z_slide_bot'], h1 + 0.1), box(-26, 26, -11, 11, h0 - 0.1, h1 + 0.1),
+    sl, sw = P['slide_l'] / 2 + 0.5, P['slide_w'] / 2 + 0.5   # 0.5 mm clearance around the slide
+    return cut(hold, box(-sl, sl, -sw, sw, P['z_slide_bot'], h1 + 0.1), box(-26, 26, -11, 11, h0 - 0.1, h1 + 0.1),
                box(-7, 7, -21.1, -12, P['z_slide_bot'] - 0.8, h1 + 0.1),
                *[bolt_v(x, y, h1, h0, cb_depth=3.2) for x, y in pat('levelling')])

@@ -1,11 +1,12 @@
 # overview camera (placeholder) and its led
 from argus.geo import *
-from argus.spec import P
+from argus.spec import F, P
 
 
 def add_bought(add):
     oc = P['overview']
-    cam = fuse(box(oc['x'] - 12.5, oc['x'] + 12.5, -12, 12, 183, 184),
+    c = F.overview_camera
+    cam = fuse(box(oc['x'] - c.board_w / 2, oc['x'] + c.board_w / 2, -c.board_l / 2, c.board_l / 2, 183, 184),
                box(oc['x'] - 4.25, oc['x'] + 4.25, -4.25, 4.25, oc['z_lens'], 183),
                box(oc['x'] - 3, oc['x'] + 3, -10, 10, 184, 186))
     add('Overview camera (USB, tbd)', cam, 'F', 6, 'elec', 'Overview camera', 10, 'pcb', mass=4, buy='cam3',

@@ -22,6 +22,7 @@ Units are mm, z is up, the optical axis is x = 0, y = 0 and the top of the plywo
 Bought part shapes and their cut-outs are in `argus.catalog`: `nema17`, `nema_holes`, `lm8uu`, `t8_nut`, `t8_mount_holes`, `endstop_board`.
 
 Numbers come from `argus.spec`:
+- `F.<item>.<value>` for a real-world size in `spec/facts.yaml`, like `F.lm8uu.od` or `F.endstop_board.hole_spacing`
 - `P['name']` for a parameter in `spec/params.yaml`
 - `pat('interface_name')` for the hole centres of an interface in `spec/interfaces.yaml`, already computed from params
 
@@ -30,7 +31,7 @@ Numbers come from `argus.spec`:
 ```python
 # lens clamp: split collar for the zoom lens barrel, screwed to the focus carriage
 from argus.geo import *
-from argus.spec import P, pat
+from argus.spec import F, P, pat
 
 META = dict(name='Lens clamp', group='Z', layer=5, sub='Optics', step=9, color='zstage', orient='zmin',
             note='What it does and how to print it, in one or two sentences.',

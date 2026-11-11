@@ -4,7 +4,8 @@
 #
 # axis: direction of the hole
 # pattern: hole centres in the plane across the axis: (y, z) for axis x, (x, z) for axis y, (x, y) for axis z
-# numbers can also be written as a formula of params.yaml names, like "xblk_l - 14" or "-xr_y"
+# numbers can also be written as a formula of params.yaml names and facts.yaml items, like "xblk_l - 14" or
+# "endstop_board.hole_spacing / 2"
 # holes: per part: plane = coordinate along the axis where the hole starts, dir = +1 or -1 into the part,
 #        depth = how deep the check looks, kind = insert (m3 heat-set, 4.0) clearance (m3 bolt, 3.4) or bore,
 #        only = which pattern points this part has (default all)
@@ -13,7 +14,7 @@ x_rods:
   about: two 8 mm X rods, ends pressed into both X end blocks
   axis: x
   pattern: [["-xr_y", "xr_z"], ["xr_y", "xr_z"]]
-  d: 8.1
+  d: "rod_bore_d"
   holes:
     x_end_block_l: {plane: "xblk_l", dir: -1, depth: 9, kind: bore}
     x_end_block_r: {plane: "xblk_r", dir: 1, depth: 9, kind: bore}
@@ -23,9 +24,9 @@ x_screw:
   axis: x
   pattern: [["xs_y", "xs_z"]]
   holes:
-    x_end_block_l: {plane: "xblk_l - 14", dir: 1, depth: 6, kind: bore, d: 22.5}
-    x_end_block_r: {plane: "xblk_r", dir: 1, depth: 7, kind: bore, d: 22.1}
-    x_carriage: {plane: -3.0, dir: 1, depth: 6, kind: bore, d: 14.6}
+    x_end_block_l: {plane: "xblk_l - 14", dir: 1, depth: 6, kind: bore, d: "nema17.boss_d + 0.5"}
+    x_end_block_r: {plane: "xblk_r", dir: 1, depth: 7, kind: bore, d: "bearing_seat_d"}
+    x_carriage: {plane: -3.0, dir: 1, depth: 6, kind: bore, d: "t8_nut.spring_d + 1.6"}
 
 x_carriage_to_y_blocks:
   about: M3 screws hold the Y blocks on top of the X carriage
@@ -39,7 +40,8 @@ x_carriage_to_y_blocks:
 x_endstop_sensor:
   about: optical endstop board screws onto the X endstop pedestal (19 mm spacing assumed, check the real board)
   axis: z
-  pattern: [["x_endstop[0]", "x_endstop[1] - 9.5"], ["x_endstop[0]", "x_endstop[1] + 9.5"]]
+  pattern: [["x_endstop[0]", "x_endstop[1] - endstop_board.hole_spacing / 2"],
+            ["x_endstop[0]", "x_endstop[1] + endstop_board.hole_spacing / 2"]]
   holes:
     x_endstop_pedestal: {plane: 10.0, dir: -1, depth: 5, kind: insert}
 
@@ -47,7 +49,7 @@ y_rods:
   about: two 8 mm Y rods between the Y front and back blocks
   axis: y
   pattern: [["-yr_x", "yr_z"], ["yr_x", "yr_z"]]
-  d: 8.1
+  d: "rod_bore_d"
   holes:
     y_front_block: {plane: -45.0, dir: -1, depth: 9, kind: bore}
     y_back_block: {plane: 45.0, dir: 1, depth: 7, kind: bore}
@@ -57,14 +59,14 @@ y_screw:
   axis: y
   pattern: [["ys_x", "ys_z"]]
   holes:
-    y_front_block: {plane: -66.0, dir: 1, depth: 6, kind: bore, d: 22.5}
-    y_back_block: {plane: 45.0, dir: 1, depth: 7, kind: bore, d: 22.1}
-    y_carriage: {plane: -3.0, dir: 1, depth: 6, kind: bore, d: 14.6}
+    y_front_block: {plane: -66.0, dir: 1, depth: 6, kind: bore, d: "nema17.boss_d + 0.5"}
+    y_back_block: {plane: 45.0, dir: 1, depth: 7, kind: bore, d: "bearing_seat_d"}
+    y_carriage: {plane: -3.0, dir: 1, depth: 6, kind: bore, d: "t8_nut.spring_d + 1.6"}
 
 y_endstop_sensor:
   about: Y endstop board screws on top of the Y front block
   axis: z
-  pattern: [[-9.5, -54.0], [9.5, -54.0]]
+  pattern: [["-endstop_board.hole_spacing / 2", -54.0], ["endstop_board.hole_spacing / 2", -54.0]]
   holes:
     y_front_block: {plane: "yr_z + 12", dir: -1, depth: 5, kind: insert}
 
@@ -88,7 +90,7 @@ z_rods:
   about: two 8 mm Z rods, lower ear on the column, upper ear in the top cap
   axis: z
   pattern: [["-zrod_x", "zrod_y"], ["zrod_x", "zrod_y"]]
-  d: 8.1
+  d: "rod_bore_d"
   holes:
     column: {plane: 110.0, dir: 1, depth: 9, kind: bore}
     column_top_cap: {plane: 196.0, dir: 1, depth: 13, kind: bore}
@@ -114,14 +116,15 @@ focus_drive:
   axis: z
   pattern: [[0.0, "zrod_y"], [20.0, "zrod_y"]]
   holes:
-    focus_motor_bracket: {plane: 221.0, dir: 1, depth: 3, kind: bore, d: 9.2}
+    focus_motor_bracket: {plane: 221.0, dir: 1, depth: 3, kind: bore, d: "byj48.boss_d + 0.2"}
 
 byj_mount:
   about: 28BYJ-48 mounting ears (35 mm spacing) on the motor bracket
   axis: z
-  pattern: [[28.0, "zrod_y - 17.5"], [28.0, "zrod_y + 17.5"]]
+  pattern: [["20 + byj48.shaft_offset", "zrod_y - byj48.ear_spacing / 2"],
+            ["20 + byj48.shaft_offset", "zrod_y + byj48.ear_spacing / 2"]]
   holes:
-    focus_motor_bracket: {plane: 221.0, dir: 1, depth: 3, kind: bore, d: 4.2}
+    focus_motor_bracket: {plane: 221.0, dir: 1, depth: 3, kind: bore, d: "byj48.ear_hole_d"}
 
 column_to_overview:
   about: 2 M3x60 screws go through the column and the overview arm
@@ -143,29 +146,36 @@ diffuser_seat:
   about: the 28 mm diffuser disc sits on the LED tower ledge at z 22, top at 25
   axis: z
   pattern: [[0.0, 0.0]]
-  d: 28.4
+  d: "diffuser.d + 0.4"
   holes:
     led_tower: {plane: "diffuser_top - 3", dir: 1, depth: 3, kind: bore}
 
 uno_mount:
   about: Arduino Uno mounting holes, inserts in the tray standoffs
   axis: z
-  pattern: [["uno_origin[0] + 13.97", "uno_origin[1] + 2.54"], ["uno_origin[0] + 15.24", "uno_origin[1] + 50.8"],
-            ["uno_origin[0] + 66.04", "uno_origin[1] + 7.62"], ["uno_origin[0] + 66.04", "uno_origin[1] + 35.56"]]
+  pattern: [["uno_origin[0] + uno.holes[0][0]", "uno_origin[1] + uno.holes[0][1]"],
+            ["uno_origin[0] + uno.holes[1][0]", "uno_origin[1] + uno.holes[1][1]"],
+            ["uno_origin[0] + uno.holes[2][0]", "uno_origin[1] + uno.holes[2][1]"],
+            ["uno_origin[0] + uno.holes[3][0]", "uno_origin[1] + uno.holes[3][1]"]]
   holes:
     uno_tray: {plane: 9.0, dir: -1, depth: 5, kind: insert}
 
 pi_mount:
   about: Raspberry Pi 58 x 49 mm holes, M2.5 screws tap into the standoffs
   axis: z
-  pattern: [["pi_origin[0] + 3.5", "pi_origin[1] + 3.5"], ["pi_origin[0] + 61.5", "pi_origin[1] + 3.5"],
-            ["pi_origin[0] + 3.5", "pi_origin[1] + 52.5"], ["pi_origin[0] + 61.5", "pi_origin[1] + 52.5"]]
+  pattern: [["pi_origin[0] + pi3b.holes[0][0]", "pi_origin[1] + pi3b.holes[0][1]"],
+            ["pi_origin[0] + pi3b.holes[1][0]", "pi_origin[1] + pi3b.holes[1][1]"],
+            ["pi_origin[0] + pi3b.holes[2][0]", "pi_origin[1] + pi3b.holes[2][1]"],
+            ["pi_origin[0] + pi3b.holes[3][0]", "pi_origin[1] + pi3b.holes[3][1]"]]
   holes:
-    pi_mount: {plane: 8.0, dir: -1, depth: 4, kind: bore, d: 2.2}
+    pi_mount: {plane: 8.0, dir: -1, depth: 4, kind: bore, d: "m25_tap_d"}
 
 overview_camera_mount:
   about: overview camera board screws (placeholder until the USB camera is picked)
   axis: z
-  pattern: [["overview['x'] - 10.5", -6.25], ["overview['x'] - 10.5", 6.25], ["overview['x'] + 10.5", -6.25], ["overview['x'] + 10.5", 6.25]]
+  pattern: [["overview['x'] + overview_camera.holes[0][0]", "overview_camera.holes[0][1]"],
+            ["overview['x'] + overview_camera.holes[1][0]", "overview_camera.holes[1][1]"],
+            ["overview['x'] + overview_camera.holes[2][0]", "overview_camera.holes[2][1]"],
+            ["overview['x'] + overview_camera.holes[3][0]", "overview_camera.holes[3][1]"]]
   holes:
-    overview_arm: {plane: 186.0, dir: 1, depth: 4, kind: bore, d: 2.0}
+    overview_arm: {plane: 186.0, dir: 1, depth: 4, kind: bore, d: "overview_camera.hole_d"}

@@ -2,6 +2,8 @@
 from cadquery import Vector as V
 from argus.spec import P, IF, CONTRACTS, SPEC_VERSION
 from argus.printing import oriented
+from argus import inputs as INP
+from argus.spec import FACTS
 
 AX = {'x': (1, 0, 0), 'y': (0, 1, 0), 'z': (0, 0, 1)}
 KIND_D = {'insert': 'insert_d', 'clearance': 'm3_clear_d'}
@@ -101,6 +103,18 @@ def run(rec, support_report=None):
         item('supports', 'Prints without supports', 'WARN' if bad else 'PASS', f'{len(bad)} overhang area(s)' if bad else 'none',
              'Downward faces flatter than 42 degrees wider than 4 mm and longer than 12 mm need supports. '
              'Change the print orientation in META or add a 45 degree chamfer.' + (f' Areas: {bad[:3]}' if bad else ''))
+    keys = INP.inputs_of(rec)
+    stt, un = INP.state(key, keys)
+    if stt == 'provisional':
+        det = ('Uses facts that are not verified yet: ' + ', '.join(f"{i} ({FACTS[i]['status']})" for i in un) +
+               '. Verify them first (verify issues), then the part gets a re-check task.')
+        item('inputs', 'Inputs verified', 'WARN', 'provisional', det)
+    elif stt == 're-check':
+        item('inputs', 'Inputs verified', 'WARN', 'needs re-check',
+             'Every input is verified, but the part was not re-checked against these values yet. Do the re-check task, '
+             f'then run `python tools/audit.py --confirm {key}`.')
+    else:
+        item('inputs', 'Inputs verified', 'PASS', 'confirmed', 'Re-checked against the current verified facts.')
     st = c.get('built_for_spec', 0)
     item('spec', 'Built for the current spec', 'PASS' if st == SPEC_VERSION else 'WARN', f'spec {st}, now {SPEC_VERSION}',
          'The spec changed since this part was last checked. Re-check its interfaces, then the integrator bumps built_for_spec.')

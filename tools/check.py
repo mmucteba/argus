@@ -73,6 +73,17 @@ def main():
     for i in items:
         if i['status'] not in ('PASS', 'WARN', 'FAIL'):
             i['status'] = 'PASS'  # info lines count as pass
+    if not a.part:
+        # one line for all the input states instead of one warning per part
+        inp = [i for i in items if i['id'].endswith('.inputs') and i['status'] == 'WARN']
+        if inp:
+            items = [i for i in items if i not in inp]
+            prov = sorted(i['part'] for i in inp if i['value'] == 'provisional')
+            rech = sorted(i['part'] for i in inp if i['value'] != 'provisional')
+            items.append(dict(id='inputs', part='all parts', title='Inputs verified', status='WARN',
+                              value=f'{len(prov)} provisional, {len(rech)} need a re-check',
+                              detail='Parts built on unverified facts or not yet re-checked: see the Status board issue and '
+                                     '`python tools/audit.py`. Re-check: ' + (', '.join(rech) or 'none') + '.'))
     n = {s: sum(1 for i in items if i['status'] == s) for s in ('PASS', 'WARN', 'FAIL')}
     for i in sorted(items, key=lambda i: ('FAIL', 'WARN', 'PASS').index(i['status'])):
         if i['status'] != 'PASS' or a.part:

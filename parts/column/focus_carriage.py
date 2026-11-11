@@ -1,6 +1,6 @@
 # focus carriage: rides the z rods on 2 lm8uu, m4 nut on top, carries the lens clamp
 from argus.geo import *
-from argus.spec import pat
+from argus.spec import F, pat
 from parts.column.layout import ZY, FZ0, FZ1, FZC
 
 META = dict(name='Focus carriage', group='Z', layer=5, sub='Column and focus', step=8, color='zstage', orient='ymin',
@@ -18,7 +18,9 @@ def build():
         voids.append(bore)
         voids += ziptie_slots((x, y, FZC), 'z', '+y', 61.9, y - 2)
     fc = fc.fuse(box(-6, 6, 66, 82, 183, FZ1)).fuse(box(8, 12, 64, 70, 145, FZ0 + 1))
-    voids += [hexprism(7.2, 3.4, (0, ZY, FZ1 - 3.4)), cyl(2.3, (0, ZY, 182.9), (0, ZY, FZ1 + 0.1)),
+    nut = F.m4_nut
+    af, nh = nut.af + 0.2, nut.h + 0.2
+    voids += [hexprism(af, nh, (0, ZY, FZ1 - nh)), cyl(2.3, (0, ZY, 182.9), (0, ZY, FZ1 + 0.1)),
               cyl(1.2, (7.9, 67, 147.5), (12.1, 67, 147.5))]
     voids += [ins((x, 62, z), '+y', 6.0) for x, z in pat('focus_to_lens_clamp')]
     return cut(fc, *voids)

@@ -4,6 +4,7 @@ Newest first. Each one says what we picked and why, so nobody re-opens it by acc
 
 | ID | Date | Decision | Why | Revisit when |
 |---|---|---|---|---|
+| D-18 | 11 Nov 2026 | Every real-world size lives in `spec/facts.yaml` with its source; parts read facts through traced formulas; a part is provisional until all its facts are verified and confirmed after a re-check; a daily audit opens verify and re-check tasks | We do not design on guesses, and a changed measurement automatically flags every part it touches | never (how the repo works) |
 | D-17 | 11 Nov 2026 | Work is split into one file per printed part, with shared numbers in `spec/` and checks on every pull request | Several people and AIs can design in parallel without breaking each other's parts | never (how the repo works) |
 | D-16 | 8 Nov 2026 | No Z endstop: GRBL homes X and Y only (`HOMING_CYCLE_0` = X and Y), soft limits off, the Pi keeps moves inside the travel | Only 2 switches are needed; the third optical endstop stays as a spare | if we want soft limits on all axes: spare endstop as Z home |
 | D-15 | 8 Nov 2026 | LED ring data from Pi GPIO10 (SPI) through a 74HCT125 and 470 ohm; ring and LED card on the 5 V buck; Pi on its own supply | 3.3 V data is not enough for WS2812 at 5 V; separate Pi supply avoids brownouts | |

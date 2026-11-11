@@ -85,8 +85,9 @@ def wood_hole(x, y, z_top, z_bot, cb_to=None):
     return s
 
 
-def saddle(center, axis, length, half_w, open_dir, r=7.55, dip=1.0, wall=3.5, plate_face=None):
+def saddle(center, axis, length, half_w, open_dir, r=None, dip=1.0, wall=3.5, plate_face=None):
     # half pipe pocket for lm8uu that wraps the bearing past its centre by dip
+    r = r or P['lm8uu_seat_d'] / 2
     cx, cy, cz = center
     if axis == 'x' and open_dir == '-z':
         blk = box(cx - length / 2, cx + length / 2, cy - half_w, cy + half_w, cz - dip, plate_face)

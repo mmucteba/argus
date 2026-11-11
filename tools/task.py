@@ -69,6 +69,31 @@ def bought_near(key, margin=3.0):
     return out
 
 
+def facts_lines(key):
+    # real-world numbers behind this part and how sure we are about them
+    from argus import registry, inputs as INP
+    from argus.spec import FACTS, VERIFIED
+    rec = registry.build(only=key)[0]
+    keys = INP.inputs_of(rec)
+    st, un = INP.state(key, keys)
+    items = {}
+    for k in keys:
+        i, v = k.split('.', 1)
+        items.setdefault(i, []).append(v)
+    out = []
+    for i, vs in sorted(items.items()):
+        f = FACTS[i]
+        ok = 'verified' if f['status'] in VERIFIED else 'NOT VERIFIED'
+        vals = ', '.join(f"{v} = {fmt(f['values'][v])}" for v in vs if v != '*') or 'whole item: ' + ', '.join(
+            f'{a} = {fmt(b)}' for a, b in f['values'].items())
+        out.append(f"- `{i}` ({f['status']}, {ok}): {vals}. Read them as `F.{i}.<name>`.")
+    if st == 'provisional':
+        out += ['', f"**Stop first:** this part is provisional. {', '.join(un)} must be verified (measured or datasheet, "
+                "see the issues labelled verify) before this design is final. If you go on anyway, say in your note "
+                "which numbers are still unverified."]
+    return out or ['- none']
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('part')
@@ -116,9 +141,13 @@ def main():
         '- Bought parts in or next to your space (assembled, stage at home):',
         *([f'  - {n}' for n in bought_near(key)] or ['  - none']),
         '',
+        '## Facts this part depends on',
+        *facts_lines(key),
+        '',
         '## Rules',
         f'1. Change only `{path}`' + ''.join(f' and `{x}`' for x in a.also) + '. Keep `META` and `build()`.',
-        '2. Take numbers from `P[...]` and `pat(...)`. Never type in a number another part depends on.',
+        '2. Take numbers from `P[...]`, `pat(...)` and `F.<item>.<value>` (facts). Never type in a real-world size or a '
+        'number another part depends on; if a size you need is missing from spec/facts.yaml, ask for it in a change request.',
         '3. If the goal needs a bigger envelope, a moved interface or a new parameter, do not change shared files: '
         'finish what you can and write a **change request** (what, why, the new numbers) at the end of your answer.',
         '4. Print-friendly: no supports in the chosen orientation (overhangs steeper than 45 degrees from vertical need a '

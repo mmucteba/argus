@@ -1,6 +1,6 @@
 # ring light holder: push-fit sleeve on the lens front, cone carries the led ring
 from argus.geo import *
-from argus.spec import P
+from argus.spec import F, P
 from parts.optics.layout import LF, LR, RING_Z, RING_TOP
 
 META = dict(name='Ring light holder', group='Z', layer=5, sub='Optics', step=9, color='zstage', orient='zmin',
@@ -13,7 +13,7 @@ META = dict(name='Ring light holder', group='Z', layer=5, sub='Optics', step=9, 
 def build():
     rb = LR + 0.2
     pt = RING_TOP + 2.5
-    plate = tube(44.5, 34.0, (0, 0, RING_TOP), (0, 0, pt))
+    plate = tube(F.led_ring.od / 2 + 1.25, F.led_ring.id / 2 - 1.75, (0, 0, RING_TOP), (0, 0, pt))
     shell = cut(cone(36.5, 22.3, (0, 0, pt - 0.01), (0, 0, pt + 18)), cone(34.5, 20.3, (0, 0, pt - 0.02), (0, 0, pt + 18.01)))
     zj = 126.0
     sleeve = cut(cyl(23.5, (0, 0, zj), (0, 0, LF + 20)), cone(23.4, rb, (0, 0, zj - 0.01), (0, 0, zj + 3.7)),
