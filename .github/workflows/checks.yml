@@ -1,0 +1,88 @@
+# runs every check on each pull request and on main, posts the report on the pull request,
+# and keeps the built outputs (3d viewer, stl print pack, step, parts and wiring pages) as a download
+name: checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+
+      - name: install
+        run: pip install -r requirements.txt
+
+      - name: run the checks
+        id: checks
+        run: |
+          set +e
+          SCOPE=""
+          if [ "${{ github.event_name }}" = "pull_request" ]; then SCOPE="--scope origin/${{ github.base_ref }}"; fi
+          python tools/check.py $SCOPE --report build/report.md --json build/checks.json
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+          if [ ! -f build/report.md ]; then echo "## ARGUS checks crashed, open the log of this step" > build/report.md; fi
+          cat build/report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: software tests
+        id: sw
+        run: |
+          set +e
+          python -m pytest software -q
+          c=$?
+          if [ $c -eq 5 ]; then c=0; fi   # 5 = no tests yet
+          echo "code=$c" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: build the outputs
+        if: always()
+        continue-on-error: true
+        run: |
+          python tools/build.py --files
+          python tools/pages/make_shop_page.py
+          python tools/pages/make_wiring_page.py
+
+      - name: keep the outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: argus-build
+          path: |
+            build/*.html
+            build/*.zip
+            build/*.pdf
+            build/*.step
+            build/report.md
+          retention-days: 30
+
+      - name: post the report on the pull request
+        if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          { cat build/report.md; echo; echo "3D viewer, STL print pack and pages: download **argus-build** from ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"; } > build/comment.md
+          gh pr comment ${{ github.event.pull_request.number }} --body-file build/comment.md --edit-last || \
+          gh pr comment ${{ github.event.pull_request.number }} --body-file build/comment.md
+
+      - name: fail when a check failed
+        if: steps.checks.outputs.code != '0' || steps.sw.outputs.code != '0'
+        run: exit 1

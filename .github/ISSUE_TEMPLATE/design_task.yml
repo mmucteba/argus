@@ -1,0 +1,34 @@
+name: Design task
+description: One printed part. The prompt inside works in any AI.
+title: "[design] <part>: <goal>"
+labels: [design]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Integrator: make the prompt with `python tools/task.py <part> --goal "..." --inputs "..."` and paste it below.
+        Everyone else: **assign yourself before you start** so two people do not take the same part. Guide: REHBER.md
+  - type: input
+    id: part
+    attributes:
+      label: Part
+      description: key from spec/contracts.yaml, like lens_clamp
+    validations:
+      required: true
+  - type: dropdown
+    id: who
+    attributes:
+      label: Best done by
+      options:
+        - Fable (hard geometry)
+        - Any strong AI
+        - Anyone, small change
+    validations:
+      required: true
+  - type: textarea
+    id: prompt
+    attributes:
+      label: Prompt
+      description: output of tools/task.py; copy all of it into your AI
+    validations:
+      required: true

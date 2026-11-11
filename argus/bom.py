@@ -1,0 +1,16 @@
+# bill of materials from spec/bom.yaml
+from argus.spec import _load
+
+_B = _load('bom.yaml')
+BUDGET_TL = _B['budget_tl']
+STATUS_TXT = _B['status_txt']
+HARDWARE = [(h['item'], h['qty']) for h in _B['hardware']]
+REDESIGN = _B['redesign']
+PART_KEY = _B['part_key']
+FREE_SHIPPING = _B['free_shipping_tl']
+
+
+def rows():
+    return [dict(key=i['key'], step=i['step'], store=i['store'], item=i['item'], url=i['url'], unit=i['unit_tl'],
+                 qty=i['qty'], total=round(i['unit_tl'] * i['qty'], 2), status=i['status'], note=i['note'])
+            for i in _B['items']]

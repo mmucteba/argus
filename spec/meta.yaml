@@ -1,0 +1,80 @@
+# names and texts for the viewer and the build guide
+layers:
+- Base and electronics
+- Illumination
+- X axis (bottom, long)
+- Y axis (top, short)
+- Slide holder and slide
+- Optics column and focus
+- Overview camera
+cats:
+  printed: 3D printed
+  mech: Bought, mechanical or optical (no wiring)
+  elec: Bought, electronics (needs wiring)
+steps:
+- title: Base plate and feet
+  text: Have the plywood plate cut to 300 x 270 mm. Tape the 1:1 drilling template on it, mark and pre-drill 2.5 mm pilot
+    holes, then screw the rubber feet underneath.
+- title: Light source
+  text: Screw the heatsink and the 3 W LED star together with thermal paste, drop them into the LED tower, run the wires out
+    of the side slot, put the opal diffuser on the ledge and screw the tower down at the centre mark.
+- title: X rails and X carriage
+  text: Press the 4 LM8UU into the saddles under the X carriage and zip-tie each one twice. Push both X rods into the left
+    end block, slide the carriage on, push the rods into the right end block, then screw both blocks down. Tighten the 4 set
+    screws. The carriage must slide by hand end to end with no tight spot.
+- title: X drive and X endstop
+  text: Screw the NEMA17 to the left block, fit the coupling, slide the anti-backlash nut onto the T8 screw, put the screw
+    into the coupling and the 608 bearing in the right block. Bolt the nut to the carriage bracket with screws loose, run
+    the carriage end to end, then tighten. Screw down the endstop pedestal and sensor.
+- title: Y rails and Y carriage
+  text: 'Same as X: 4 LM8UU zip-tied into the Y carriage saddles, Y rods into the front block, carriage on, rods into the
+    back block. Screw both blocks onto the X carriage (inserts already set).'
+- title: Y drive and Y endstop
+  text: Y motor onto the front block, coupling, T8 screw with nut, 608 in the back block, nut to the Y carriage bracket. Screw
+    the Y endstop sensor on top of the front block and the flag onto the Y carriage.
+- title: Slide holder
+  text: Put a spring on each of the 3 M3x16 screws, screw the holder onto the Y carriage and level it later with the camera
+    (best focus at 4 corners within about 15 um).
+- title: Column and focus
+  text: Screw the column down. Zip-tie 2 LM8UU into the focus carriage, push the Z rods through the upper ear, the carriage
+    bearings and into the lower ear, tighten the set screws. Press the M4 nut into the carriage, thread the M4 rod down through
+    the ear into it, add the gears, motor bracket, 28BYJ-48, knob and the extension spring.
+- title: Optics
+  text: Screw the lens clamp to the focus carriage through its bore. Fit the C-CS adapter on the HQ camera and screw the zoom
+    lens in. Turn the zoom to 1.8x (max), slide the lens into the clamp until its front is about 55 mm above the slide, focus
+    roughly by sliding, then tighten the two clamp screws. Push the ring light holder onto the lens front and stick the LED
+    ring under it.
+- title: Overview camera
+  text: Bolt the overview arm through the column with two M3x60 screws, screw the camera board under the end plate with M2
+    screws and push the 5 mm white LED into its hole.
+- title: Electronics
+  text: Screw down the Uno tray and the Pi mount, set the heat-set inserts, mount the Uno + CNC shield and the Pi 3B+. Wire
+    power, motors, endstops, the LED card and the ring by the wiring page; set the driver jumpers and Vref before the first
+    power-up.
+colors:
+  frame: '#949cab'
+  xstage: '#5f86cc'
+  ystage: '#d48a52'
+  holder: '#d9c062'
+  zstage: '#3d9c88'
+  tube: '#26282c'
+  steel: '#c9ced6'
+  motor: '#3a3d44'
+  alu: '#b7bcc4'
+  pcb: '#2f7a45'
+  glass: '#9fd3e6'
+  led: '#fff4c2'
+  diffuser: '#f2f2f2'
+  rubber: '#2b2b2b'
+  brass: '#c8a24a'
+  overview: '#9a6fd6'
+  optic: '#7fb6ff'
+  wood: '#c9a979'
+  sensor: '#232323'
+orient_txt:
+  zmin: as assembled (bottom face down)
+  zmax: upside down (top face down)
+  xmin: on its left (-X) face
+  xmax: on its right (+X) face
+  ymin: on its front (-Y) face
+  ymax: on its back (+Y) face

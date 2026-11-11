@@ -1,0 +1,183 @@
+# contracts: one entry per printed part
+# envelope = the box (x0 x1 y0 y1 z0 z1, assembled position) the part may use; the whole-machine check catches the rest
+# built_for_spec = spec_version the part was last checked against; the checks warn when the spec moves on
+# status: ok, needs-measurement, redesign, in-progress
+# the holes a part must have are listed in interfaces.yaml
+# only the integrator edits this file
+led_tower:
+  module: light
+  name: LED tower
+  status: needs-measurement
+  built_for_spec: 3
+  envelope: [-30, 30, -30, 30, 0, 25]
+  source: model v0.3, dimensions from listings
+  open: Redesign for the 23 x 30 mm LED card and the 20 x 15 x 10 mm heatsink. Listing sizes for now; needs a photo with a ruler and
+    the card hole positions.
+x_carriage:
+  module: x_axis
+  name: X carriage
+  status: ok
+  built_for_spec: 3
+  envelope: [-51, 51, -57, 84, 11, 35]
+  source: model v0.3, dimensions from listings
+  open: ''
+x_end_block_l:
+  module: x_axis
+  name: X end block L
+  status: ok
+  built_for_spec: 3
+  envelope: [-92, -70, -56, 94, -1, 48]
+  source: model v0.3, dimensions from listings
+  open: ''
+x_end_block_r:
+  module: x_axis
+  name: X end block R
+  status: ok
+  built_for_spec: 3
+  envelope: [120, 137, -56, 86, -1, 40]
+  source: model v0.3, dimensions from listings
+  open: ''
+x_endstop_pedestal:
+  module: x_axis
+  name: X endstop pedestal
+  status: needs-measurement
+  built_for_spec: 3
+  envelope: [-75, -51, -48, 8, 0, 12]
+  source: model v0.3, dimensions from listings
+  open: 'Fit the real 32 x 10 x 21 mm optical endstop board: hole spacing and fork slot depth.'
+y_back_block:
+  module: y_axis
+  name: Y back block
+  status: ok
+  built_for_spec: 3
+  envelope: [-51, 85, 44, 56, 33, 62]
+  source: model v0.3, dimensions from listings
+  open: ''
+y_carriage:
+  module: y_axis
+  name: Y carriage
+  status: ok
+  built_for_spec: 3
+  envelope: [-57, 81, -29, 29, 34, 61]
+  source: model v0.3, dimensions from listings
+  open: ''
+y_endstop_flag:
+  module: y_axis
+  name: Y endstop flag
+  status: ok
+  built_for_spec: 3
+  envelope: [-7, 7, -43, -19, 59, 67]
+  source: model v0.3, dimensions from listings
+  open: ''
+y_front_block:
+  module: y_axis
+  name: Y front block
+  status: ok
+  built_for_spec: 3
+  envelope: [-51, 90, -67, -44, 24, 70]
+  source: model v0.3, dimensions from listings
+  open: ''
+slide_holder:
+  module: slide
+  name: Slide holder
+  status: ok
+  built_for_spec: 3
+  envelope: [-47, 47, -22, 22, 62, 70]
+  source: model v0.3, dimensions from listings
+  open: ''
+column:
+  module: column
+  name: Column
+  status: ok
+  built_for_spec: 3
+  envelope: [-36, 36, 65, 141, -1, 202]
+  source: model v0.3, dimensions from listings
+  open: ''
+column_top_cap:
+  module: column
+  name: Column top cap
+  status: ok
+  built_for_spec: 3
+  envelope: [-31, 31, 64, 137, 194, 212]
+  source: model v0.3, dimensions from listings
+  open: ''
+focus_carriage:
+  module: column
+  name: Focus carriage
+  status: ok
+  built_for_spec: 3
+  envelope: [-31, 31, 61, 83, 144, 190]
+  source: model v0.3, dimensions from listings
+  open: ''
+focus_gear_motor:
+  module: column
+  name: Focus gear (motor)
+  status: ok
+  built_for_spec: 3
+  envelope: [8, 32, 64, 88, 213, 221]
+  source: model v0.3, dimensions from listings
+  open: ''
+focus_gear_screw:
+  module: column
+  name: Focus gear (screw)
+  status: ok
+  built_for_spec: 3
+  envelope: [-12, 12, 64, 88, 213, 221]
+  source: model v0.3, dimensions from listings
+  open: ''
+focus_knob:
+  module: column
+  name: Focus knob
+  status: ok
+  built_for_spec: 3
+  envelope: [-12, 12, 64, 88, 224, 236]
+  source: model v0.3, dimensions from listings
+  open: ''
+focus_motor_bracket:
+  module: column
+  name: Focus motor bracket
+  status: ok
+  built_for_spec: 3
+  envelope: [-27, 47, 53, 99, 209, 225]
+  source: model v0.3, dimensions from listings
+  open: ''
+lens_clamp:
+  module: optics
+  name: Lens clamp
+  status: needs-measurement
+  built_for_spec: 3
+  envelope: [-30, 30, -36, 62, 145, 205]
+  source: model v0.3, dimensions from listings
+  open: 'Lens arrives: measure barrel diameter, where the zoom ring sits and the height at best focus.'
+ring_light_holder:
+  module: optics
+  name: Ring light holder
+  status: needs-measurement
+  built_for_spec: 3
+  envelope: [-46, 46, -46, 46, 100, 146]
+  source: model v0.3, dimensions from listings
+  open: Follows the lens measurements (front barrel diameter, working distance).
+overview_arm:
+  module: overview
+  name: Overview arm
+  status: redesign
+  built_for_spec: 3
+  envelope: [25, 92, -20, 128, 176, 198]
+  source: model v0.3, dimensions from listings
+  open: Overview camera will be a USB module (not picked yet); camera holes are a placeholder.
+pi_mount:
+  module: electronics
+  name: Pi mount
+  status: ok
+  built_for_spec: 3
+  envelope: [36, 128, 87, 150, -1, 9]
+  source: model v0.3, dimensions from listings
+  open: ''
+uno_tray:
+  module: electronics
+  name: Uno tray
+  status: ok
+  built_for_spec: 3
+  envelope: [-133, 13, -115, -55, -1, 10]
+  source: model v0.3, dimensions from listings
+  open: ''

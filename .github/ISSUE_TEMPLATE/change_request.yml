@@ -1,0 +1,41 @@
+name: Change request
+description: A shared number, an interface or an envelope has to change
+title: "[change] <what>: <short reason>"
+labels: [change-request]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this when your part cannot be done without changing something other parts depend on:
+        spec/params.yaml, spec/interfaces.yaml, spec/contracts.yaml, a bought part model, or argus/.
+        The integrator decides, bumps spec_version, and the checks then show which parts need an update.
+  - type: input
+    id: what
+    attributes:
+      label: What has to change
+      description: file and name, like interfaces.yaml focus_to_lens_clamp or params.yaml wd
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: the problem you hit, with numbers (a measurement, a collision, a part that cannot fit)
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: the new values
+    validations:
+      required: true
+  - type: input
+    id: affects
+    attributes:
+      label: Parts affected
+      description: part keys you think need an update after this
+  - type: input
+    id: link
+    attributes:
+      label: Task or pull request

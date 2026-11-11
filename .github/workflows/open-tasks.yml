@@ -1,0 +1,21 @@
+# opens an issue for every new task file in tasks/ when it lands on main
+name: open-tasks
+on:
+  push:
+    branches: [main]
+    paths: ['tasks/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  open:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: open issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/open_tasks.py

@@ -1,0 +1,1144 @@
+<title>ARGUS Slide Scanner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Saira+Condensed:wght@500;600;700&display=swap">
+<style>
+/* layout: instrument console, 3d stage on the left with two live camera insets, tabbed control rack on the right; stacks on phones */
+:root {
+  --bg: #eceef3; --surface: #fafbfd; --raise: #ffffff; --ink: #1a1c25; --muted: #5b6070; --line: #d5d8e2;
+  --stage: #dfe3ea; --accent: #5a3ea6; --accent-ink: #ffffff; --accent-soft: #e7e1f6; --eosin: #c94a77;
+  --ok: #23744a; --ok-bg: #dcefe4; --warn: #915c10; --warn-bg: #f5e8cf; --fail: #b23a2e; --fail-bg: #f6dcd8;
+  --info: #4a5170; --info-bg: #e3e6ef; --edge: #2a2d38; --ghost: #9aa0b2; --beam: #f0bd2e; --inset-bg: #0e1016;
+  --f-display: "Saira Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1117; --surface: #161922; --raise: #1c202b; --ink: #e6e7ee; --muted: #9a9fb1; --line: #2a2f3c;
+    --stage: #0b0d12; --accent: #a48cff; --accent-ink: #15101f; --accent-soft: #2a2347; --eosin: #f07aa1;
+    --ok: #62c891; --ok-bg: #15301f; --warn: #e9b45a; --warn-bg: #36290f; --fail: #f2766c; --fail-bg: #3b1b18;
+    --info: #aab2d0; --info-bg: #232838; --edge: #c9cede; --ghost: #5b6172; --beam: #ffd75e; --inset-bg: #050608;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1117; --surface: #161922; --raise: #1c202b; --ink: #e6e7ee; --muted: #9a9fb1; --line: #2a2f3c;
+  --stage: #0b0d12; --accent: #a48cff; --accent-ink: #15101f; --accent-soft: #2a2347; --eosin: #f07aa1;
+  --ok: #62c891; --ok-bg: #15301f; --warn: #e9b45a; --warn-bg: #36290f; --fail: #f2766c; --fail-bg: #3b1b18;
+  --info: #aab2d0; --info-bg: #232838; --edge: #c9cede; --ghost: #5b6172; --beam: #ffd75e; --inset-bg: #050608;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px; box-sizing: border-box;
+}
+*, *::before, *::after { box-sizing: border-box; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.app { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 12px; }
+
+/* header */
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 20px; }
+.brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; min-width: 0; }
+.brand h1 { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 30px; letter-spacing: 0.06em; line-height: 1; }
+.brand h1 span { color: var(--accent); }
+.brand p { margin: 0; color: var(--muted); font-size: 13px; }
+.summary { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font-family: var(--f-mono);
+  font-size: 12px; font-weight: 500; border: 0; cursor: pointer; white-space: nowrap; }
+.chip i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.s-PASS { background: var(--ok-bg); color: var(--ok); } .s-WARN { background: var(--warn-bg); color: var(--warn); }
+.s-FAIL { background: var(--fail-bg); color: var(--fail); } .s-INFO { background: var(--info-bg); color: var(--info); }
+.meta { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+
+/* work area */
+.work { display: grid; grid-template-columns: minmax(0, 1fr) 384px; gap: 12px; min-height: 0; }
+.stage { position: relative; border-radius: 10px; overflow: hidden; background: var(--stage); min-height: 0; min-width: 0; }
+#c { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+#c:active { cursor: grabbing; }
+.hud { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; gap: 8px; pointer-events: none; flex-wrap: wrap; }
+.readout { background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px;
+  font-family: var(--f-mono); font-size: 12px; display: grid; gap: 2px; pointer-events: auto; max-width: 100%; }
+.readout b { font-weight: 500; color: var(--muted); margin-right: 4px; }
+.readout .phase { font-family: var(--f-body); color: var(--accent); font-weight: 500; }
+.viewbtns { display: flex; gap: 4px; pointer-events: auto; flex-wrap: wrap; align-self: flex-start; }
+.vb { background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--line); border-radius: 6px; padding: 4px 9px;
+  font-size: 12px; cursor: pointer; }
+.vb:hover { border-color: var(--accent); }
+.inset { position: absolute; border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent); border-radius: 4px; }
+.inset .cap { position: absolute; left: -1px; bottom: 100%; margin-bottom: 4px; font-family: var(--f-mono); font-size: 11px; white-space: nowrap;
+  background: color-mix(in srgb, var(--surface) 90%, transparent); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+#insObj { left: 12px; bottom: 12px; width: 280px; height: 210px; pointer-events: none; }
+#insOvw { right: 12px; bottom: 12px; width: 300px; height: 173px; cursor: crosshair; }
+.inset .msg { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 10px; color: #f1f1f4; font-size: 12px; }
+.inset .msg[hidden] { display: none !important; }
+.scale { position: absolute; right: 8px; bottom: 7px; font-family: var(--f-mono); font-size: 10px; color: #f5f5f7; text-align: center; text-shadow: 0 0 3px #000; }
+.scale i { display: block; height: 3px; background: #f5f5f7; margin-bottom: 2px; box-shadow: 0 0 3px #000; }
+.flash { animation: flash 0.35s ease-out; }
+@keyframes flash { from { box-shadow: 0 0 0 3px var(--accent); } to { box-shadow: 0 0 0 0 transparent; } }
+.tag { position: absolute; left: 0; top: 0; transform: translate(-50%, calc(-100% - 10px)); pointer-events: none; z-index: 2;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--accent); border-radius: 6px; padding: 4px 9px; font-size: 12px;
+  font-weight: 500; white-space: nowrap; box-shadow: 0 2px 10px color-mix(in srgb, var(--ink) 18%, transparent); max-width: calc(100% - 20px); overflow: hidden; text-overflow: ellipsis; }
+.tag i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+.tag small { font-family: var(--f-mono); color: var(--muted); font-weight: 400; margin-left: 6px; }
+.badge { position: absolute; top: 6px; right: 6px; font-family: var(--f-mono); font-size: 10px; padding: 1px 6px; border-radius: 3px; background: var(--accent); color: var(--accent-ink); }
+
+/* panel */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); padding: 0 6px; }
+.tab { flex: 1; background: none; border: 0; padding: 11px 2px 9px; font-family: var(--f-display); font-weight: 600; font-size: 14px; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.pane { overflow: auto; padding: 14px 16px 18px; flex: 1; min-height: 0; display: grid; align-content: start; gap: 16px; }
+.pane[hidden] { display: none !important; }
+h2 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.sec { display: grid; gap: 8px; }
+.lead { margin: 0; color: var(--muted); font-size: 13px; max-width: 62ch; }
+.row { display: grid; grid-template-columns: 22px minmax(0, 1fr) 84px; gap: 10px; align-items: center; }
+.row label { font-family: var(--f-display); font-weight: 600; font-size: 18px; }
+.row output { font-family: var(--f-mono); font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.btn { border: 1px solid var(--line); background: var(--raise); border-radius: 6px; padding: 6px 10px; font-size: 13px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.mono { font-family: var(--f-mono); font-size: 12px; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+.toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.toggle input { accent-color: var(--accent); width: 16px; height: 16px; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 8px; align-items: baseline; padding: 6px 8px; border-radius: 6px; }
+.steps li::before { content: counter(s); font-family: var(--f-display); font-weight: 700; font-size: 16px; color: var(--muted); }
+.steps li.on { background: var(--accent-soft); } .steps li.on::before { color: var(--accent); }
+.steps li.done::before { content: "\2713"; color: var(--ok); }
+.steps small { font-family: var(--f-mono); color: var(--muted); font-size: 11px; }
+.prog { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; position: relative; }
+.prog i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--accent); }
+.prog .lim { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--fail); }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+td { padding: 4px 0; border-bottom: 1px solid var(--line); }
+td.n { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+tr.tot td { font-weight: 600; border-bottom: 0; }
+.layer { display: grid; grid-template-columns: 18px 12px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.sw { width: 12px; height: 12px; border-radius: 3px; }
+.layer small { font-family: var(--f-mono); color: var(--muted); font-size: 11px; }
+.check { border: 1px solid var(--line); border-radius: 8px; background: var(--raise); }
+.check > button { all: unset; box-sizing: border-box; width: 100%; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; padding: 9px 10px; cursor: pointer; }
+.check > button:focus-visible { outline: 2px solid var(--accent); border-radius: 8px; }
+.check .t { font-weight: 500; }
+.check .v { grid-column: 2; font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.check .d { padding: 0 10px 10px; display: grid; gap: 8px; font-size: 13px; color: var(--muted); }
+.check .d p { margin: 0; }
+.pill { font-family: var(--f-mono); font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 4px; align-self: start; margin-top: 2px; }
+.cat { font-family: var(--f-display); font-weight: 600; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.card { border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: var(--raise); display: grid; gap: 8px; }
+.card h3 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 22px; letter-spacing: 0.02em; line-height: 1.1; text-wrap: balance; }
+dl { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; font-size: 13px; }
+dt { color: var(--muted); } dd { margin: 0; font-family: var(--f-mono); font-size: 12px; overflow-wrap: anywhere; }
+.plist { display: grid; gap: 2px; }
+.plist button { all: unset; cursor: pointer; padding: 3px 6px; border-radius: 4px; font-size: 13px; display: flex; justify-content: space-between; gap: 8px; }
+.plist button:hover, .plist button.sel { background: var(--accent-soft); }
+.plist button span { font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+details summary { cursor: pointer; font-weight: 500; padding: 3px 0; }
+.note { font-size: 12px; color: var(--muted); margin: 0; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { border: 0; background: var(--raise); padding: 5px 10px; font-family: var(--f-mono); font-size: 12px; cursor: pointer; border-right: 1px solid var(--line); }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+
+@media (max-width: 900px) {
+  html, body { height: auto; }
+  .app { height: auto; }
+  .work { grid-template-columns: minmax(0, 1fr); }
+  .stage { height: 64svh; min-height: 380px; }
+  .pane { overflow: visible; }
+}
+@media (max-width: 600px) {
+  #insObj { width: 152px; height: 114px; left: 8px; bottom: 8px; }
+  #insOvw { width: 170px; height: 98px; right: 8px; bottom: 8px; }
+  .brand h1 { font-size: 26px; }
+  .readout { font-size: 11px; }
+}
+.cap .sm { display: none; }
+.stepno { font-family: var(--f-display); font-weight: 600; font-size: 17px; letter-spacing: 0.04em; min-width: 92px; text-align: center; }
+.seg.wide { display: flex; width: 100%; }
+.seg.wide button { flex: 1; font-family: var(--f-body); font-size: 12px; padding: 6px 4px; }
+th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--line); }
+td.q { font-family: var(--f-mono); font-size: 12px; color: var(--muted); white-space: nowrap; padding-right: 8px; }
+td.sm { font-size: 12px; color: var(--muted); }
+.catdot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+.plist button em { font-style: normal; min-width: 0; overflow-wrap: anywhere; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.st { font-family: var(--f-mono); font-size: 10px; padding: 1px 5px; border-radius: 3px; white-space: nowrap; }
+.st-chosen { background: var(--ok-bg); color: var(--ok); } .st-check, .st-quote { background: var(--warn-bg); color: var(--warn); }
+.st-borrow { background: var(--accent-soft); color: var(--accent); } .st-later { background: var(--info-bg); color: var(--info); }
+#shop a, #partCard a { color: var(--accent); }
+.price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.price b { font-family: var(--f-mono); font-size: 24px; font-weight: 500; color: var(--accent); font-variant-numeric: tabular-nums; }
+.price span:not(.st) { color: var(--muted); font-size: 12px; }
+.mini { font-family: var(--f-mono); font-size: 11px; padding: 1px 6px; border-radius: 4px; background: var(--info-bg); color: var(--info); }
+@media (max-width: 600px) { .cap .lg { display: none; } .cap .sm { display: inline; } }
+@media (prefers-reduced-motion: reduce) { .flash { animation: none; } }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <h1>ARGUS <span>T18</span></h1>
+      <p>Automated pathology slide scanner, print-ready model v0.3</p>
+    </div>
+    <div class="summary" id="summary"></div>
+  </header>
+
+  <main class="work">
+    <section class="stage" id="stage" aria-label="3D model">
+      <canvas id="c"></canvas>
+      <div class="hud">
+        <div class="readout" id="readout">
+          <div><b>X</b><span id="rx">+0.00</span> <b>Y</b><span id="ry">+0.00</span> <b>Z</b><span id="rz">+0.000</span> mm</div>
+          <div class="phase" id="phase">Drag to orbit, scroll to zoom, tap a part to zoom to it</div>
+        </div>
+        <div class="viewbtns">
+          <button class="vb" data-view="iso">3D</button>
+          <button class="vb" data-view="front">Front</button>
+          <button class="vb" data-view="side">Side</button>
+          <button class="vb" data-view="top">Top</button>
+          <button class="vb" data-view="close">Optical axis</button>
+          <button class="vb" id="clearHl" hidden>Clear highlight</button>
+        </div>
+      </div>
+      <div class="tag" id="tag" hidden></div>
+      <div class="inset" id="insObj"><span class="cap"><span class="lg" id="objCap">Main camera</span><span class="sm">Main camera</span></span>
+        <div class="msg" id="objMsg" hidden></div>
+        <div class="scale" id="objScale"><i style="width:40px"></i>500 um</div>
+      </div>
+      <div class="inset" id="insOvw" title="Tap the slide to place the 15 x 15 mm scan box"><span class="cap"><span class="lg">Overview camera, tap to place scan box</span><span class="sm">Overview, tap slide</span></span>
+        <div class="msg" id="ovwMsg" hidden></div>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <nav class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="scan" aria-selected="true">Scan</button>
+        <button class="tab" role="tab" data-tab="move" aria-selected="false">Move</button>
+        <button class="tab" role="tab" data-tab="build" aria-selected="false">Build</button>
+        <button class="tab" role="tab" data-tab="part" aria-selected="false">Parts</button>
+        <button class="tab" role="tab" data-tab="checks" aria-selected="false">Checks</button>
+        <button class="tab" role="tab" data-tab="layers" aria-selected="false">View</button>
+      </nav>
+
+      <div class="pane" id="tab-scan">
+        <div class="sec">
+          <h2>Run a scan</h2>
+          <p class="lead">Plays the full sequence on the model with the timing from the checks. The insets show what each camera sees. Tap the overview image to move the scan box first.</p>
+          <ol class="steps" id="steps">
+            <li data-step="0"><span>Overview photo at the park position</span><small id="st0"></small></li>
+            <li data-step="1"><span>Place the 15 x 15 mm scan box</span><small id="st1"></small></li>
+            <li data-step="2"><span>Focus map at 4 corners</span><small id="st2"></small></li>
+            <li data-step="3"><span>Tile scan, serpentine</span><small id="st3"></small></li>
+          </ol>
+          <div class="btns">
+            <button class="btn primary" id="runScan">Run full scan</button>
+            <button class="btn" id="pauseScan" disabled>Pause</button>
+            <button class="btn" id="stopScan" disabled>Stop</button>
+            <button class="btn" id="clearTiles">Clear tiles</button>
+          </div>
+          <div class="btns" style="align-items:center;gap:10px">
+            <span class="note">Playback</span>
+            <div class="seg" id="speed">
+              <button data-s="1" aria-pressed="false">1x</button><button data-s="5" aria-pressed="false">5x</button><button data-s="20" aria-pressed="true">20x</button><button data-s="60" aria-pressed="false">60x</button>
+            </div>
+          </div>
+          <div class="prog" aria-label="Scan time"><i id="progBar"></i><span class="lim" id="progLim"></span></div>
+          <p class="note" id="progTxt">Scanner time 0:00 of the 5:00 limit</p>
+        </div>
+        <div class="sec">
+          <h2>Time budget (model estimate)</h2>
+          <table id="timeTbl"></table>
+        </div>
+      </div>
+
+      <div class="pane" id="tab-move" hidden>
+        <div class="sec">
+          <h2>Stage and focus</h2>
+          <div class="row"><label for="sx">X</label><input type="range" id="sx" step="0.1"><output id="ox"></output></div>
+          <div class="row"><label for="sy">Y</label><input type="range" id="sy" step="0.1"><output id="oy"></output></div>
+          <div class="row"><label for="sz">Z</label><input type="range" id="sz" step="0.001"><output id="oz"></output></div>
+          <div class="btns">
+            <button class="btn mono" data-dz="-0.1">-100 um</button><button class="btn mono" data-dz="-0.01">-10 um</button>
+            <button class="btn mono" data-dz="0.01">+10 um</button><button class="btn mono" data-dz="0.1">+100 um</button>
+            <button class="btn" id="autofocus">Autofocus here</button>
+          </div>
+          <p class="note">X and Y move the slide under the fixed zoom lens. Z moves the lens and the HQ camera on the focus carriage. One turn of the focus knob is 700 um. Depth of field is about <span id="dofTxt"></span> um, so the main camera only goes soft after a few hundred um.</p>
+        </div>
+        <div class="sec">
+          <h2>Positions</h2>
+          <div class="btns" id="presets"></div>
+        </div>
+        <div class="sec">
+          <h2>Lights</h2>
+          <label class="toggle"><input type="checkbox" id="led" checked> Bottom LED (transmitted light for scanning)</label>
+          <label class="toggle"><input type="checkbox" id="ring"> Ring light (printed paper targets)</label>
+        </div>
+      </div>
+
+      <div class="pane" id="tab-layers" hidden>
+        <div class="sec">
+          <h2>Layers, bottom to top</h2>
+          <div class="sec" id="layerList"></div>
+        </div>
+        <div class="sec">
+          <h2>View</h2>
+          <div class="row" style="grid-template-columns:70px minmax(0,1fr) 60px"><label for="explode" style="font-size:15px">Explode</label><input type="range" id="explode" min="0" max="70" step="1" value="0"><output id="oe">0 mm</output></div>
+          <label class="toggle"><input type="checkbox" id="section"> Section cut through the optical axis</label>
+          <label class="toggle"><input type="checkbox" id="beam" checked> Light path (yellow) and overview view cone</label>
+          <label class="toggle"><input type="checkbox" id="edges" checked> Part edges</label>
+        </div>
+      </div>
+
+      <div class="pane" id="tab-checks" hidden>
+        <p class="lead" id="checkLead"></p>
+        <div class="sec" id="checkList"></div>
+      </div>
+
+      <div class="pane" id="tab-build" hidden>
+        <div class="sec">
+          <h2>Build it step by step</h2>
+          <p class="lead">Each step shows only what is assembled so far. The parts added in this step glow; their screws are listed underneath.</p>
+          <div class="btns" style="align-items:center">
+            <button class="btn" id="bPrev">Previous</button>
+            <span class="stepno" id="bNo"></span>
+            <button class="btn primary" id="bNext">Next</button>
+            <button class="btn" id="bAll">Whole scanner</button>
+          </div>
+          <div class="card"><h3 id="bTitle"></h3><p class="note" id="bText"></p></div>
+        </div>
+        <div class="sec"><h2>Parts added in this step</h2><table id="bParts"></table></div>
+        <div class="sec"><h2>Screws and small parts</h2><table id="bHw"></table></div>
+      </div>
+
+      <div class="pane" id="tab-part" hidden>
+        <div class="sec">
+          <h2>Show in the model</h2>
+          <div class="seg wide" id="catSeg">
+            <button data-c="" aria-pressed="true">All</button><button data-c="printed" aria-pressed="false">3D printed</button><button data-c="mech" aria-pressed="false">Mechanical</button><button data-c="elec" aria-pressed="false">Electronics</button>
+          </div>
+          <p class="note" id="catNote"></p>
+        </div>
+        <div class="card" id="partCard"><h3>Tap a part</h3><p class="note">Tap anything in the 3D view, or pick from the list below.</p></div>
+        <div class="sec"><h2 id="plTitle">Parts</h2><div id="partList"></div></div>
+        <div class="sec"><h2>Shopping list</h2><table id="shop"></table><p class="note" id="shopNote"></p></div>
+        <div class="sec"><h2>Screws, inserts and zip ties</h2><table id="hwTbl"></table></div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/","three-mesh-bvh":"https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.7.6/build/index.module.js"}}</script>
+<script>window.ARGUS = /*__DATA__*/null;</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { computeBoundsTree, acceleratedRaycast } from 'three-mesh-bvh';
+THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+THREE.Mesh.prototype.raycast = acceleratedRaycast;
+
+const D = window.ARGUS, P = D.params, CH = D.checks, CD = CH.data;
+const $ = (s) => document.querySelector(s);
+const fmt = (v, d = 2) => (v >= 0 ? '+' : '') + v.toFixed(d);
+const zf = P.z_focal, OPT = CD.optics, OV = CD.overview, SC = CD.scan, CM = CD.clearmap;
+const NA = P.na, DOF = OPT.dof_um, FW = OPT.fov[0], FH = OPT.fov[1];
+const GROUP_TXT = { F: 'Fixed to the base', X: 'Moves with X', Y: 'Moves with X and Y', Z: 'Moves with focus' };
+const CAT_TXT = D.cats;
+const CAT_COL = { printed: '#5f86cc', mech: '#9aa3b2', elec: '#2f9a5c' };
+
+// ---------- renderer and scene
+const canvas = $('#c'), stageEl = $('#stage');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.localClippingEnabled = false;
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8890a0, 0.6));
+const sun = new THREE.DirectionalLight(0xffffff, 1.4); sun.position.set(-200, -300, 500); scene.add(sun);
+const cam = new THREE.PerspectiveCamera(32, 1, 1, 4000);
+cam.up.set(0, 0, 1);
+const controls = new OrbitControls(cam, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.12;
+const root = new THREE.Group(); scene.add(root);
+const G = { F: new THREE.Group(), Y: new THREE.Group(), X: new THREE.Group(), Z: new THREE.Group() };
+root.add(G.F, G.X, G.Z); G.X.add(G.Y);
+
+function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+const edgeMat = new THREE.LineBasicMaterial({ color: 0x222222, transparent: true, opacity: 0.28, depthWrite: false });
+const ghostMat = new THREE.MeshBasicMaterial({ color: 0x999999, transparent: true, opacity: 0.07, depthWrite: false, side: THREE.DoubleSide });
+
+function buf(s) { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u.buffer; }
+function matFor(p) {
+  const c = new THREE.Color(p.color);
+  p.kind = /rod|screw|spring/i.test(p.name) && p.cat === 'mech' ? 'steel' : (p.color === '#9fd3e6' ? 'glass' : (p.color === '#7fb6ff' || p.name.includes('diffuser') ? 'optic' : (p.cat === 'printed' ? 'printed' : 'vendor')));
+  const o = { color: c, side: THREE.DoubleSide };
+  if (p.kind === 'steel') return new THREE.MeshStandardMaterial({ ...o, metalness: 0.85, roughness: 0.28 });
+  if (p.kind === 'glass') return new THREE.MeshStandardMaterial({ ...o, metalness: 0, roughness: 0.05, transparent: true, opacity: 0.22, depthWrite: false });
+  if (p.kind === 'optic') return new THREE.MeshStandardMaterial({ ...o, metalness: 0, roughness: 0.1, transparent: true, opacity: 0.55, depthWrite: false });
+  if (p.kind === 'printed') return new THREE.MeshStandardMaterial({ ...o, metalness: 0, roughness: 0.72 });
+  const metal = /alu|steel|c9ced6|b7bcc4/.test(p.color) || /coupling|bearing|Zoom lens|LM8UU|608/.test(p.name);
+  return new THREE.MeshStandardMaterial({ ...o, metalness: metal ? 0.7 : 0.15, roughness: metal ? 0.35 : 0.6 });
+}
+const meshes = [], holders = [];
+for (const p of D.parts) {
+  const q = new Int16Array(buf(p.v)), pos = new Float32Array(q.length);
+  for (let i = 0; i < q.length; i++) pos[i] = q[i] / 100;
+  const idx = p.i32 ? new Uint32Array(buf(p.i)) : new Uint16Array(buf(p.i));
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setIndex(new THREE.BufferAttribute(idx, 1));
+  geo.computeVertexNormals();
+  geo.computeBoundsTree();
+  const m = new THREE.Mesh(geo, matFor(p));
+  m.userData = { part: p, base: m.material };
+  const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 28), edgeMat);
+  m.add(e); m.userData.edges = e;
+  if (p.kind === 'glass' || p.kind === 'optic') e.visible = false;
+  const holder = new THREE.Group(); holder.add(m); holder.userData.layer = p.layer; holder.userData.step = p.step; holders.push(holder);
+  G[p.group].add(holder);
+  meshes.push(m);
+}
+const byName = (n) => meshes.filter((m) => m.userData.part.name === n);
+
+// ---------- procedural H&E tissue on the slide, with tile overlay
+const ov = document.createElement('canvas'); ov.width = 1500; ov.height = 500;
+const ovx = ov.getContext('2d'), ovTex = new THREE.CanvasTexture(ov);
+const tissueMat = new THREE.ShaderMaterial({
+  uniforms: { uOver: { value: ovTex }, uBlur: { value: 0 }, uLight: { value: 1 }, uOv: { value: 1 } },
+  polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4,
+  vertexShader: `varying vec2 vP; varying vec2 vUv; void main(){ vP = position.xy; vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }`,
+  fragmentShader: `
+    uniform sampler2D uOver; uniform float uBlur; uniform float uLight; uniform float uOv;
+    varying vec2 vP; varying vec2 vUv;
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
+    vec2 hash2(vec2 p){ return fract(sin(vec2(dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3))))*43758.5453); }
+    float noise(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.-2.*f);
+      return mix(mix(hash(i),hash(i+vec2(1.,0.)),u.x), mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),u.x), u.y); }
+    float fbm(vec2 p){ float s=0., a=.5; for(int i=0;i<5;i++){ s+=a*noise(p); p*=2.03; a*=.5; } return s; }
+    float nucd(vec2 p, float cell){ vec2 g=p/cell, i=floor(g), f=fract(g); float md=9.;
+      for(int y=-1;y<=1;y++) for(int x=-1;x<=1;x++){ vec2 o=vec2(float(x),float(y)); vec2 r=o+hash2(i+o)*.8+.1-f; md=min(md,dot(r,r)); }
+      return sqrt(md)*cell; }
+    vec3 shade(vec2 p, float pix){
+      vec2 c = (p - vec2(-9.,0.5))/vec2(13.,8.);
+      float t = smoothstep(1.0, .93, length(c) + (fbm(p*.32)-.5)*.6);
+      vec2 c2 = (p - vec2(-5.,2.5))/vec2(4.5,3.2);
+      float tu = smoothstep(1.0, .8, length(c2) + (fbm(p*.9+7.)-.5)*.7) * t;
+      float str = fbm(p*vec2(1.4,3.6)+3.);
+      vec3 eos = mix(vec3(.95,.66,.78), vec3(.86,.45,.63), str);
+      float cell = mix(.032, .019, tu), rad = mix(.0048, .0068, tu);
+      float d = nucd(p, cell);
+      float nuc = 1. - smoothstep(rad - pix*.7, rad + pix*.7, d);
+      float cover = 3.1416*rad*rad/(cell*cell)*.85;
+      nuc = mix(nuc, cover, smoothstep(cell*.25, cell*1.1, pix));
+      vec3 hem = mix(vec3(.36,.24,.58), vec3(.25,.14,.46), tu);
+      vec3 tis = mix(eos, hem, clamp(nuc*.92 + tu*.12, 0., 1.));
+      return mix(vec3(.965,.965,.975), tis, t*.96);
+    }
+    void main(){
+      float pix = max(length(fwidth(vP)), 1e-5);
+      vec3 col;
+      if (uBlur > .0004) { col = vec3(0.);
+        for (int k=0;k<12;k++){ float a=float(k)*2.39996; float r=uBlur*sqrt((float(k)+.5)/12.); col += shade(vP + r*vec2(cos(a),sin(a)), max(pix, uBlur*.6)); }
+        col /= 12.; }
+      else col = shade(vP, pix);
+      vec4 o = texture2D(uOver, vUv); col = mix(col, o.rgb, o.a*uOv);
+      gl_FragColor = vec4(col*uLight, 1.);
+    }`,
+});
+const tissue = new THREE.Mesh(new THREE.PlaneGeometry(P.slide_l, P.slide_w), tissueMat);
+tissue.position.z = P.z_cover_top + 0.02;
+tissue.layers.enable(1);
+const tissueHolder = new THREE.Group(); tissueHolder.add(tissue); tissueHolder.userData.layer = 4; tissueHolder.userData.step = 7; G.Y.add(tissueHolder); holders.push(tissueHolder);
+
+// ---------- light path and overview cone
+const beams = [];
+function frustum(r0, z0, r1, z1, color, op, group, layer) {
+  const g = new THREE.CylinderGeometry(r1, r0, z1 - z0, 48, 1, true); g.rotateX(Math.PI / 2); g.translate(0, 0, (z0 + z1) / 2);
+  const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color, transparent: true, opacity: op, depthWrite: false, side: THREE.DoubleSide }));
+  const h = new THREE.Group(); h.add(m); h.userData.layer = layer; h.userData.step = 0; h.userData.beam = true; G[group].add(h); holders.push(h); beams.push(m); return m;
+}
+const tna = Math.tan(Math.asin(NA)), rf = OPT.r_fov, zd = P.diffuser_top;
+frustum(rf + (zf - zd) * tna, zd, rf, zf, 0xf3c13a, 0.42, 'F', 1);
+frustum(rf + (zf - zd) * Math.tan(Math.asin(OPT.na_ill)), zd, rf, zf, 0xf3c13a, 0.09, 'F', 1);
+frustum(rf, P.z_cover_top, rf + P.wd * tna, P.z_obj_tip, 0xf3c13a, 0.42, 'Z', 5);
+{
+  const h = OV.z_lens - P.z_cover_top, hx = h * Math.tan(OV.hfov * Math.PI / 360), hy = h * Math.tan(OV.vfov * Math.PI / 360);
+  const o = [OV.x, OV.y, OV.z_lens], zc = P.z_cover_top, c = [[hx, hy], [-hx, hy], [-hx, -hy], [hx, -hy]];
+  const pts = [];
+  for (const [a, b] of c) pts.push(...o, OV.x + a, b, zc);
+  for (let i = 0; i < 4; i++) { const [a, b] = c[i], [a2, b2] = c[(i + 1) % 4]; pts.push(OV.x + a, b, zc, OV.x + a2, b2, zc); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+  const l = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x9a6fd6, transparent: true, opacity: 0.8 }));
+  const hh = new THREE.Group(); hh.add(l); hh.userData.layer = 6; hh.userData.step = 0; hh.userData.beam = true; G.F.add(hh); holders.push(hh); beams.push(l);
+}
+
+// ---------- inset cameras
+const objCam = new THREE.OrthographicCamera(-FW / 2, FW / 2, FH / 2, -FH / 2, 0.01, 3);
+objCam.position.set(0, 0, P.z_cover_top + 0.6); objCam.up.set(0, 1, 0); objCam.lookAt(0, 0, 0); objCam.layers.set(1);
+const ovCam = new THREE.PerspectiveCamera(OV.vfov, Math.tan(OV.hfov * Math.PI / 360) / Math.tan(OV.vfov * Math.PI / 360), 1, 500);
+ovCam.position.set(OV.x, OV.y, OV.z_lens - 0.3); ovCam.up.set(0, 1, 0); ovCam.lookAt(OV.x, OV.y, 0);
+
+// ---------- state
+const S = { x: 0, y: 0, z: 0, led: true, ring: false, explode: 0, section: false, roi: { u: -8, v: 0 }, tiles: [], cur: -1,
+  speed: 20, run: null, paused: false, simT: 0, hl: null, hlMode: 'ghost', sel: null, captured: false, cat: '', build: null, layerOn: D.layers.map(() => true), beamOn: true, selGroup: [], home: null };
+const clip = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+let dirty = true;
+function setPose(x, y, z) {
+  S.x = THREE.MathUtils.clamp(x, P.x_travel[0], P.x_travel[1]);
+  S.y = THREE.MathUtils.clamp(y, P.y_travel[0], P.y_travel[1]);
+  S.z = THREE.MathUtils.clamp(z, P.z_travel[0], P.z_travel[1]);
+  G.X.position.x = S.x; G.Y.position.y = S.y; G.Z.position.z = S.z;
+  $('#rx').textContent = fmt(S.x); $('#ry').textContent = fmt(S.y); $('#rz').textContent = fmt(S.z, 3);
+  $('#sx').value = S.x; $('#sy').value = S.y; $('#sz').value = S.z;
+  $('#ox').textContent = fmt(S.x) + ' mm'; $('#oy').textContent = fmt(S.y) + ' mm';
+  $('#oz').textContent = Math.abs(S.z) < 1 ? fmt(S.z * 1000, 0) + ' um' : fmt(S.z) + ' mm';
+  dirty = true;
+}
+function applyExplode(e) { for (const h of holders) h.position.z = h.userData.layer * e; }
+function setExplode(e) { S.explode = e; applyExplode(e); $('#oe').textContent = e + ' mm'; dirty = true; }
+
+// ---------- overlay drawing (75 x 25 mm at 20 px per mm)
+const PX = 20;
+const toPx = (u, v) => [(u + P.slide_l / 2) * PX, (P.slide_w / 2 - v) * PX];
+function tileCenters() {
+  const out = [], u0 = S.roi.u - P.roi / 2, v0 = S.roi.v - P.roi / 2;
+  for (let j = 0; j < SC.ny; j++) for (let k = 0; k < SC.nx; k++) {
+    const i = j % 2 ? SC.nx - 1 - k : k;
+    out.push([u0 + FW / 2 + i * SC.stepx, v0 + FH / 2 + j * SC.stepy]);
+  }
+  return out;
+}
+function drawOverlay() {
+  const c = ovx; c.clearRect(0, 0, ov.width, ov.height);
+  const lx = toPx(P.slide_l / 2 - P.label_len, 0)[0];
+  c.fillStyle = 'rgba(244,243,238,1)'; c.fillRect(lx, 0, ov.width - lx, ov.height);
+  c.fillStyle = '#2a2a33'; c.font = '600 54px "Saira Condensed", Arial Narrow, sans-serif';
+  c.fillText('ARGUS T18', lx + 30, 110); c.font = '500 40px "IBM Plex Mono", monospace';
+  c.fillText('H&E  S-001', lx + 30, 190); c.fillText('30.10.2026', lx + 30, 250);
+  c.fillStyle = '#c94a77'; c.fillRect(lx + 30, 300, 240, 10);
+  c.fillStyle = '#2a2a33'; c.font = '400 26px "IBM Plex Mono", monospace'; c.fillText('example tissue', lx + 30, 360); c.fillText('procedural, not', lx + 30, 395); c.fillText('patient data', lx + 30, 430);
+  const r = CM.rect, [a0, b0] = toPx(r[0], r[3]), [a1, b1] = toPx(r[1], r[2]);
+  c.setLineDash([10, 8]); c.strokeStyle = 'rgba(40,40,60,0.55)'; c.lineWidth = 3; c.strokeRect(a0, b0, a1 - a0, b1 - b0); c.setLineDash([]);
+  const tc = tileCenters();
+  for (const i of S.tiles) { const [u, v] = tc[i], [x, y] = toPx(u - FW / 2, v + FH / 2);
+    c.fillStyle = 'rgba(90,62,166,0.16)'; c.fillRect(x, y, FW * PX, FH * PX); c.strokeStyle = 'rgba(90,62,166,0.55)'; c.lineWidth = 1; c.strokeRect(x, y, FW * PX, FH * PX); }
+  if (S.cur >= 0 && S.cur < tc.length) { const [u, v] = tc[S.cur], [x, y] = toPx(u - FW / 2, v + FH / 2);
+    c.strokeStyle = 'rgba(201,74,119,1)'; c.lineWidth = 4; c.strokeRect(x, y, FW * PX, FH * PX); }
+  const [x0, y0] = toPx(S.roi.u - P.roi / 2, S.roi.v + P.roi / 2);
+  c.strokeStyle = 'rgba(90,62,166,0.95)'; c.lineWidth = 5; c.strokeRect(x0, y0, P.roi * PX, P.roi * PX);
+  ovTex.needsUpdate = true; dirty = true;
+}
+
+// ---------- optics state
+function beamClear(u, v) {
+  const iu = Math.round((u - CM.u0) / CM.step), iv = Math.round((v - CM.v0) / CM.step);
+  if (iu < 0 || iv < 0 || iu >= CM.nu || iv >= CM.nv) return false;
+  return CM.crit[iv][iu] === 1;
+}
+function objState() {
+  const u = -S.x, v = -S.y;
+  if (Math.abs(u) > P.slide_l / 2 || Math.abs(v) > P.slide_w / 2) return { light: 0, msg: 'No slide under the lens' };
+  if (u > P.slide_l / 2 - P.label_len) return { light: 0.06, msg: 'Over the slide label' };
+  if (!S.led) return { light: 0.04, msg: 'Bottom LED is off' };
+  if (!beamClear(u, v)) return { light: 0.1, msg: 'Holder blocks the light here' };
+  return { light: 1, msg: '' };
+}
+function blurMm() { const dz = Math.abs(S.z) * 1000; return Math.max(0, dz - DOF / 2) * NA / 1000; }
+
+// ---------- render
+let W = 1, H = 1;
+const bgColor = new THREE.Color(), insetBg = new THREE.Color();
+function theme() {
+  bgColor.set(css('--stage')); insetBg.set(css('--inset-bg')); edgeMat.color.set(css('--edge')); ghostMat.color.set(css('--ghost')); fadeMat.color.set(css('--ghost')); selEdgeMat.color.set(css('--accent'));
+  renderer.setClearColor(bgColor); dirty = true;
+}
+function insetRect(el) {
+  const a = el.getBoundingClientRect(), b = canvas.getBoundingClientRect();
+  return { x: a.left - b.left + 1, y: a.top - b.top + 1, w: a.width - 2, h: a.height - 2 };
+}
+function renderAll() {
+  renderer.setScissorTest(false); renderer.setViewport(0, 0, W, H);
+  renderer.clippingPlanes = S.section ? [clip] : [];
+  tissueMat.uniforms.uBlur.value = 0; tissueMat.uniforms.uLight.value = 1; tissueMat.uniforms.uOv.value = 1;
+  renderer.setClearColor(bgColor); renderer.render(scene, cam);
+  const ex = S.explode; if (ex) applyExplode(0);
+  renderer.clippingPlanes = [];
+  renderer.setScissorTest(true);
+  const st = objState();
+  for (const [el, kind] of [[$('#insObj'), 'obj'], [$('#insOvw'), 'ovw']]) {
+    if (el.hidden) continue;
+    const r = insetRect(el), y = H - r.y - r.h;
+    renderer.setScissor(r.x, y, r.w, r.h); renderer.setViewport(r.x, y, r.w, r.h);
+    renderer.setClearColor(insetBg);
+    if (kind === 'obj') {
+      tissueMat.uniforms.uBlur.value = blurMm(); tissueMat.uniforms.uLight.value = st.light; tissueMat.uniforms.uOv.value = 0;
+      renderer.render(scene, objCam);
+    } else {
+      tissueMat.uniforms.uBlur.value = 0; tissueMat.uniforms.uLight.value = 0.92; tissueMat.uniforms.uOv.value = 1;
+      const vis = beams.map((b) => b.visible); beams.forEach((b) => (b.visible = false));
+      renderer.render(scene, ovCam);
+      beams.forEach((b, i) => (b.visible = vis[i]));
+    }
+  }
+  renderer.setScissorTest(false);
+  if (ex) applyExplode(ex);
+  const om = $('#objMsg'); om.hidden = !st.msg; om.textContent = st.msg;
+  placeTag();
+  tissueMat.uniforms.uOv.value = 1; tissueMat.uniforms.uLight.value = 1;
+}
+function resize() {
+  const r = stageEl.getBoundingClientRect(); W = Math.max(1, r.width); H = Math.max(1, r.height);
+  renderer.setSize(W, H, false); cam.aspect = W / H; cam.updateProjectionMatrix(); dirty = true;
+}
+new ResizeObserver(resize).observe(stageEl);
+
+// ---------- camera views
+const VIEWS = {
+  iso: { p: [-560, -760, 560], t: [10, 15, 95] }, front: { p: [0, -980, 150], t: [10, 15, 110] },
+  side: { p: [980, 15, 160], t: [10, 15, 110] }, top: { p: [0, 16, 1050], t: [10, 15, 60] },
+  close: { p: [-95, -150, 150], t: [0, 0, 88] },
+};
+let camAnim = null;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function goView(k) {
+  const v = VIEWS[k], p1 = new THREE.Vector3(...v.p), t1 = new THREE.Vector3(...v.t);
+  if (reduce) { cam.position.copy(p1); controls.target.copy(t1); controls.update(); dirty = true; return; }
+  camAnim = { t: 0, p0: cam.position.clone(), t0: controls.target.clone(), p1, t1 };
+}
+document.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => { S.home = null; goView(b.dataset.view); applyMats(); }));
+cam.position.set(...VIEWS.iso.p); controls.target.set(...VIEWS.iso.t); controls.update();
+controls.addEventListener('change', () => (dirty = true));
+
+// ---------- motion and scan sequencer
+function tmove(d) { const a = P.accel, v = P.vmax; return d < v * v / a ? 2 * Math.sqrt(d / a) : d / v + v / a; }
+function sOf(d, t) {
+  const a = P.accel, v = P.vmax;
+  if (d < v * v / a) { const T = 2 * Math.sqrt(d / a); if (t >= T) return d; if (t <= T / 2) return 0.5 * a * t * t; const r = T - t; return d - 0.5 * a * r * r; }
+  const ta = v / a, T = d / v + ta; if (t >= T) return d; if (t <= ta) return 0.5 * a * t * t; if (t >= T - ta) { const r = T - t; return d - 0.5 * a * r * r; } return 0.5 * a * ta * ta + v * (t - ta);
+}
+const zspeed = P.byj_rpm * P.m4_pitch / 60;
+function actXY(x, y, label) { return { k: 'xy', x, y, label }; }
+function actZ(z, label) { return { k: 'z', z, label }; }
+function actWait(T, label, done) { return { k: 'wait', T, label, done }; }
+function prepare(a) {
+  a.t = 0;
+  if (a.k === 'xy') { a.x0 = S.x; a.y0 = S.y; a.d = Math.hypot(a.x - S.x, a.y - S.y); a.T = a.d > 1e-6 ? tmove(a.d) : 0; }
+  if (a.k === 'z') { a.z0 = S.z; a.T = Math.abs(a.z - S.z) / zspeed; }
+}
+function stepAct(a, dt) {
+  const use = Math.min(dt, a.T - a.t); a.t += use;
+  if (a.k === 'xy' && a.d > 0) { const f = sOf(a.d, a.t) / a.d; setPose(a.x0 + (a.x - a.x0) * f, a.y0 + (a.y - a.y0) * f, S.z); }
+  if (a.k === 'z') setPose(S.x, S.y, a.z0 + (a.z - a.z0) * Math.min(1, a.T ? a.t / a.T : 1));
+  return dt - use;
+}
+function setStep(n, txt) {
+  document.querySelectorAll('#steps li').forEach((li) => { const k = +li.dataset.step; li.classList.toggle('on', k === n); li.classList.toggle('done', k < n); });
+  if (txt !== undefined && n >= 0) $('#st' + n).textContent = txt;
+}
+function buildScan() {
+  const Q = [];
+  Q.push({ k: 'mark', step: 0 });
+  Q.push(actXY(OV.park_sx, 0, 'Moving the slide to the overview position'));
+  Q.push(actWait(1.5, 'Taking the overview photo', () => { S.captured = true; flash('#insOvw'); }));
+  Q.push({ k: 'mark', step: 1 });
+  Q.push(actWait(0.6, 'Scan box placed from the overview photo'));
+  Q.push({ k: 'mark', step: 2 });
+  const h = P.roi / 2 - 1, pts = [[-h, -h], [h, -h], [h, h], [-h, h]];
+  pts.forEach(([du, dv], i) => {
+    Q.push(actXY(-(S.roi.u + du), -(S.roi.v + dv), `Autofocus point ${i + 1} of 4: moving`));
+    Q.push(actZ(0.15, `Autofocus point ${i + 1} of 4: sweeping focus`));
+    Q.push(actZ(-0.15, `Autofocus point ${i + 1} of 4: sweeping focus`));
+    Q.push(actZ(0, `Autofocus point ${i + 1} of 4: best focus`));
+    Q.push(actWait(P.settle_s, `Autofocus point ${i + 1} of 4: settling`));
+  });
+  Q.push({ k: 'mark', step: 3 });
+  const tc = tileCenters();
+  tc.forEach(([u, v], i) => {
+    Q.push({ k: 'cur', i });
+    Q.push(actXY(-u, -v, `Tile ${i + 1} of ${tc.length}: moving`));
+    Q.push(actWait(P.settle_s, `Tile ${i + 1} of ${tc.length}: settling`));
+    Q.push(actWait(P.capture_s, `Tile ${i + 1} of ${tc.length}: capturing`, () => { S.tiles.push(i); drawOverlay(); flash('#insObj'); }));
+  });
+  Q.push({ k: 'mark', step: 4 });
+  return Q;
+}
+function flash(sel) { const el = $(sel); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+function startScan() {
+  S.tiles = []; S.cur = -1; S.simT = 0; S.captured = false; drawOverlay();
+  for (let i = 0; i < 4; i++) $('#st' + i).textContent = '';
+  if (!S.led) { S.led = true; $('#led').checked = true; lights(); }
+  if (S.build !== null) exitBuild();
+  S.run = { Q: buildScan(), i: 0, a: null, marks: {} }; S.paused = false;
+  $('#runScan').disabled = true; $('#pauseScan').disabled = false; $('#stopScan').disabled = false; $('#pauseScan').textContent = 'Pause';
+  clearHighlight();
+}
+function stopScan(done) {
+  S.run = null; $('#runScan').disabled = false; $('#pauseScan').disabled = true; $('#stopScan').disabled = true;
+  if (!done) { setStep(-1); $('#phase').textContent = 'Scan stopped'; }
+}
+function tickScan(dtReal) {
+  const R = S.run; if (!R || S.paused) return;
+  let dt = dtReal * S.speed;
+  while (dt > 0 && R.i < R.Q.length) {
+    if (!R.a) {
+      const a = R.Q[R.i];
+      if (a.k === 'mark') {
+        if (R.cur !== undefined) $('#st' + R.cur).textContent = fmtT(S.simT - R.marks[R.cur]);
+        R.cur = a.step; R.marks[a.step] = S.simT; setStep(a.step); R.i++; continue;
+      }
+      if (a.k === 'cur') { S.cur = a.i; drawOverlay(); R.i++; continue; }
+      prepare(a); R.a = a;
+    }
+    const left = stepAct(R.a, dt); S.simT += dt - left; dt = left;
+    $('#phase').textContent = R.a.label;
+    if (R.a.t >= R.a.T - 1e-9) { if (R.a.done) R.a.done(); R.a = null; R.i++; }
+  }
+  updateProg();
+  if (R.i >= R.Q.length) {
+    S.cur = -1; drawOverlay(); stopScan(true);
+    $('#phase').textContent = `Scan complete: ${S.tiles.length} tiles in ${fmtT(S.simT)} of scanner time`;
+  }
+}
+function fmtT(t) { const m = Math.floor(t / 60), s = Math.round(t % 60); return `${m}:${String(s).padStart(2, '0')}`; }
+function updateProg() {
+  const lim = P.time_limit_s, max = lim * 1.1;
+  $('#progBar').style.width = Math.min(100, (S.simT / max) * 100) + '%';
+  $('#progLim').style.left = (lim / max) * 100 + '%';
+  $('#progTxt').textContent = `Scanner time ${fmtT(S.simT)} of the ${fmtT(lim)} limit` + (S.tiles.length ? `, ${S.tiles.length} of ${SC.nx * SC.ny} tiles` : '');
+}
+
+// ---------- jog animation for presets and checks
+let jog = null;
+function jogTo(x, y, z, after) { jog = { x0: S.x, y0: S.y, z0: S.z, x, y, z, t: 0, T: reduce ? 0.001 : 0.7, after }; }
+
+// ---------- lights
+const ledMeshes = [...byName('3 W LED on star PCB'), ...byName('Opal diffuser'), ...byName('60 deg LED lens')];
+const ringMeshes = byName('LED ring 24x WS2812');
+function lights() {
+  for (const m of ledMeshes) { m.userData.base.emissive = new THREE.Color(S.led ? 0xfff0b0 : 0); m.userData.base.emissiveIntensity = S.led ? 1.6 : 0; }
+  for (const m of ringMeshes) { m.userData.base.emissive = new THREE.Color(S.ring ? 0xf4f0ff : 0); m.userData.base.emissiveIntensity = S.ring ? 1.2 : 0; }
+  beams.slice(0, 2).forEach((b) => (b.material.opacity = S.led ? (b === beams[0] ? 0.42 : 0.09) : 0.04));
+  dirty = true;
+}
+
+// ---------- highlight and selection
+const fadeMat = new THREE.MeshBasicMaterial({ color: 0x999999, transparent: true, opacity: 0.10, depthWrite: false, side: THREE.DoubleSide });
+const selEdgeMat = new THREE.LineBasicMaterial({ color: 0x5a3ea6 });
+function applyMats() {
+  const hl = S.hl ? new Set(S.hl) : null, ghostOthers = hl && S.hlMode === 'ghost';
+  const sel = S.sel ? new Set(S.selGroup) : null;
+  for (const m of meshes) {
+    const p = m.userData.part, n = p.name, isSel = sel && sel.has(m), inHl = hl && hl.has(n);
+    let mode = 'base';
+    if (isSel) mode = 'glow';
+    else if (sel) mode = 'fade';
+    else if (inHl) mode = 'glow';
+    else if (ghostOthers || (S.cat && p.cat !== S.cat)) mode = 'ghost';
+    m.userData.edges.material = isSel ? selEdgeMat : edgeMat;
+    if (mode === 'ghost' || mode === 'fade') { m.material = mode === 'ghost' ? ghostMat : fadeMat; m.userData.edges.visible = false; continue; }
+    m.userData.edges.visible = isSel || ($('#edges').checked && !['glass', 'optic'].includes(p.kind));
+    if (mode === 'glow') {
+      if (!m.userData.hlMat) { m.userData.hlMat = m.userData.base.clone(); }
+      const h = m.userData.hlMat; h.color.copy(m.userData.base.color); h.emissive = new THREE.Color(css('--accent'));
+      h.emissiveIntensity = isSel ? 0.35 : 0.55; h.opacity = Math.max(h.opacity, 0.6);
+      m.material = h;
+    } else m.material = m.userData.base;
+  }
+  const b = $('#clearHl');
+  b.hidden = !(S.hl && S.hlMode === 'ghost') && !S.sel && !S.home;
+  b.textContent = S.home ? 'Back to full view' : 'Clear highlight';
+  dirty = true;
+}
+
+// ---------- fly to a part from its best angle
+const _v = new THREE.Vector3(), _w = new THREE.Vector3();
+function shown(m) { let o = m; while (o) { if (!o.visible) return false; o = o.parent; } return true; }
+function worldBox(arr) {
+  scene.updateMatrixWorld(true);
+  const b = new THREE.Box3();
+  arr.forEach((m) => b.expandByObject(m, true));
+  return b;
+}
+function samplePoints(arr, n) {
+  const pts = [];
+  for (const m of arr) {
+    const pos = m.geometry.attributes.position, k = Math.max(1, Math.floor(pos.count / Math.ceil(n / arr.length)));
+    for (let i = 0; i < pos.count; i += k) pts.push(_v.fromBufferAttribute(pos, i).applyMatrix4(m.matrixWorld).clone());
+  }
+  return pts;
+}
+function bestView(arr) {
+  const box = worldBox(arr), c = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3());
+  const r = Math.max(size.length() / 2, 7);
+  const vf = THREE.MathUtils.degToRad(cam.fov / 2), hf = Math.atan(Math.tan(vf) * cam.aspect);
+  const dist = (r / Math.sin(Math.min(vf, hf))) * 2.1 + 12;
+  const set = new Set(arr);
+  const occ = meshes.filter((m) => !set.has(m) && shown(m) && !['glass', 'optic'].includes(m.userData.part.kind) && m.material !== ghostMat);
+  const pts = samplePoints(arr, 18).concat([c.clone()]);
+  const rc = new THREE.Raycaster(); rc.firstHitOnly = true;
+  let best = null, bestS = -1;
+  const cands = [];
+  for (const el of [22, 48, 72]) for (let az = 0; az < 360; az += 45) cands.push([az, el]);
+  const areas = cands.map(([az, el]) => {
+    const a = THREE.MathUtils.degToRad(az), e = THREE.MathUtils.degToRad(el);
+    const d = new THREE.Vector3(Math.cos(a) * Math.cos(e), Math.sin(a) * Math.cos(e), Math.sin(e));
+    return { d, A: Math.abs(d.x) * size.y * size.z + Math.abs(d.y) * size.x * size.z + Math.abs(d.z) * size.x * size.y };
+  });
+  const amax = Math.max(...areas.map((q) => q.A)) || 1;
+  for (const { d, A } of areas) {
+    const eye = c.clone().addScaledVector(d, dist);
+    let vis = 0;
+    for (const p of pts) {
+      _w.subVectors(p, eye); const len = _w.length();
+      rc.set(eye, _w.normalize()); rc.far = len - 0.4;
+      if (rc.intersectObjects(occ, false).length === 0) vis++;
+    }
+    const front = d.y < -0.2 ? 0.06 : (d.y > 0.5 ? -0.04 : 0);
+    const sc = (vis / pts.length) * 0.7 + (A / amax) * 0.25 + front + (d.z > 0.3 && d.z < 0.9 ? 0.03 : 0);
+    if (sc > bestS) { bestS = sc; best = eye; }
+  }
+  return { p: best, t: c, r };
+}
+function flyTo(p1, t1) {
+  if (reduce) { cam.position.copy(p1); controls.target.copy(t1); controls.update(); dirty = true; return; }
+  camAnim = { t: 0, p0: cam.position.clone(), t0: controls.target.clone(), p1, t1 };
+}
+function focusOn(arr) {
+  if (!arr.length) return;
+  if (!S.home) S.home = { p: cam.position.clone(), t: controls.target.clone() };
+  const v = bestView(arr);
+  flyTo(v.p, v.t);
+}
+function goHome() {
+  if (S.home) { flyTo(S.home.p, S.home.t); S.home = null; }
+}
+function placeTag() {
+  const tag = $('#tag');
+  if (!S.sel || camAnim) { tag.hidden = true; return; }
+  const box = worldBox(S.selGroup);
+  let minY = Infinity, minX = Infinity, maxX = -Infinity, ok = false;
+  for (let i = 0; i < 8; i++) {
+    const p = new THREE.Vector3(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z).project(cam);
+    if (p.z > 1) continue;
+    ok = true; const sx = (p.x + 1) / 2 * W, sy = (1 - p.y) / 2 * H;
+    minY = Math.min(minY, sy); minX = Math.min(minX, sx); maxX = Math.max(maxX, sx);
+  }
+  if (!ok) { tag.hidden = true; return; }
+  const x = Math.min(Math.max((minX + maxX) / 2, 90), W - 90), y = Math.min(Math.max(minY, 48), H - 10);
+  tag.style.left = x + 'px'; tag.style.top = y + 'px'; tag.hidden = false;
+}
+function updateVis() {
+  const selSlide = S.sel && S.selGroup.some((m) => ['Glass slide', 'Coverslip', 'Slide holder'].includes(m.userData.part.name));
+  for (const h of holders) {
+    let v = S.layerOn[h.userData.layer] && (S.build === null || h.userData.step <= S.build + 1);
+    if (h.userData.beam) v = v && S.beamOn && S.build === null && !S.sel;
+    if (h === tissueHolder && S.sel && !selSlide) v = false;
+    h.visible = v;
+  }
+  insets(!S.sel && S.build === null);
+}
+function clearHighlight() { S.hl = null; S.sel = null; S.selGroup = []; goHome(); applyMats(); updateVis(); $('#tag').hidden = true; document.querySelectorAll('.plist button').forEach((b) => b.classList.remove('sel')); }
+function clearSelection() { S.sel = null; S.selGroup = []; goHome(); applyMats(); updateVis(); $('#tag').hidden = true; document.querySelectorAll('.plist button').forEach((b) => b.classList.remove('sel')); $('#phase').textContent = 'Tap a part to zoom to it'; }
+$('#clearHl').addEventListener('click', () => { if (S.build !== null) exitBuild(); clearHighlight(); });
+const uniq = {};
+D.parts.forEach((p) => { (uniq[p.name] = uniq[p.name] || []).push(p); });
+const tl = (v) => Math.round(v).toLocaleString('en-US') + ' TL';
+const hwRows = (hw) => Object.entries(hw).sort().map(([k, n]) => `<tr><td class="q">${n} x</td><td>${k}</td></tr>`).join('') || '<tr><td class="sm">nothing extra</td></tr>';
+function priceOf(p, q) {
+  if (p.pr) { const v = p.pr.grams * D.pla_tl_g; return { big: v < 1 ? '< 1 TL' : '≈ ' + tl(v), small: `filament, ${p.pr.grams} g of PLA`, tag: v < 1 ? '< 1 TL' : '≈ ' + tl(v) }; }
+  if (!p.buy) return { big: '—', small: 'no separate price, comes with another part', tag: '' };
+  if (p.buy.key === 'hw') return { big: 'kit', small: 'part of the hardware store kit (≈ 450 TL for all screws, rod, nuts, springs)', tag: 'hardware kit' };
+  if (!p.buy.unit) return { big: '?', small: `${p.buy.store}, price not known yet`, tag: 'price ?' };
+  if (p.buy.piece) { const v = p.buy.piece, e2 = v < 10 ? v.toFixed(2) + ' TL' : tl(v);
+    return { big: e2, small: `each, ${p.buy.piece_note}${q > 1 ? ` · ${tl(v * q)} for all ${q}` : ''} · ${p.buy.store}`, tag: q > 1 ? `${e2} each` : e2 }; }
+  const each = tl(p.buy.unit), tot = tl(p.buy.unit * q);
+  return { big: each, small: q > 1 ? `each, ${tot} for all ${q} in the model · ${p.buy.store}` : `each · ${p.buy.store}`, tag: q > 1 ? `${each} each` : each };
+}
+function selectPart(m, opts = {}) {
+  const p = m.userData.part, same = uniq[p.name], q = same.length;
+  if (!shown(m)) {
+    if (S.build !== null) exitBuild();
+    if (!S.layerOn[p.layer]) { S.layerOn[p.layer] = true; $('#ly' + p.layer).checked = true; updateVis(); }
+  }
+  S.sel = m; S.selGroup = opts.all ? meshes.filter((x) => x.userData.part.name === p.name) : [m];
+  focusOn(S.selGroup); applyMats(); updateVis();
+  $('#tag').innerHTML = `<i style="background:${CAT_COL[p.cat]}"></i><span></span><small></small>`;
+  const pz = priceOf(p, q);
+  $('#tag span').textContent = p.name; $('#tag small').textContent = [opts.all && q > 1 ? `all ${q}` : (q > 1 ? `1 of ${q}` : ''), pz.tag].filter(Boolean).join(' · ');
+  $('#phase').textContent = 'Tap anywhere else to go back to the full view';
+  let rows = `<dt>Type</dt><dd><span class="catdot" style="background:${CAT_COL[p.cat]}"></span>${CAT_TXT[p.cat]}</dd>
+    <dt>Belongs to</dt><dd>${p.sub}, build step ${p.step}</dd><dt>Motion</dt><dd>${GROUP_TXT[p.group]}</dd>
+    <dt>Quantity</dt><dd>${q}</dd><dt>Size</dt><dd>${p.size.join(' x ')} mm</dd>`;
+  if (p.pr) rows += `<dt>Print</dt><dd>${p.pr.orient}, no supports</dd><dt>Filament</dt><dd>${p.pr.grams} g, ${p.pr.hours < 0.1 ? 'a few minutes' : 'about ' + p.pr.hours + ' h'} each</dd>`;
+  else rows += `<dt>Mass</dt><dd>${p.mass} g</dd>`;
+  if (p.buy) rows += `<dt>Product</dt><dd></dd><dt>Store</dt><dd>${p.buy.store}${p.buy.unit ? ', ' + tl(p.buy.unit) + ' each' : ''}</dd><dt>Status</dt><dd><span class="st st-${p.buy.status}">${D.status_txt[p.buy.status]}</span></dd><dt>Link</dt><dd></dd>`;
+  const hwk = Object.keys(p.hw || {}).length;
+  if (hwk) rows += `<dt>Fasteners</dt><dd>${Object.entries(p.hw).map(([k, n]) => `${n} x ${k}`).join(', ')}</dd>`;
+  $('#partCard').innerHTML = `<h3></h3><div class="price"><b></b><span></span>${p.buy ? `<span class="st st-${p.buy.status}">${D.status_txt[p.buy.status]}</span>` : ''}</div><p class="note"></p><dl>${rows}</dl>`;
+  $('#partCard .price b').textContent = pz.big; $('#partCard .price span').textContent = pz.small;
+  $('#partCard h3').textContent = p.name + (q > 1 ? `  x${q}` : '');
+  $('#partCard .note').textContent = p.note || '';
+  if (p.buy) {
+    const dts = [...$('#partCard').querySelectorAll('dt')];
+    dts.find((d) => d.textContent === 'Product').nextElementSibling.textContent = p.buy.item + (p.buy.note ? ' (' + p.buy.note + ')' : '');
+    const ld = dts.find((d) => d.textContent === 'Link').nextElementSibling;
+    if (p.buy.url) { const a = document.createElement('a'); a.href = p.buy.url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Open product page'; ld.appendChild(a); }
+    else ld.textContent = 'no link yet';
+  }
+  document.querySelectorAll('.plist button').forEach((b) => b.classList.toggle('sel', b.dataset.name === p.name));
+  showTab('part');
+  if (matchMedia('(max-width: 900px)').matches) { if (opts.all) stageEl.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); }
+  else $('#partCard').scrollIntoView({ block: 'nearest' });
+}
+const ray = new THREE.Raycaster();
+let down = null;
+canvas.addEventListener('pointerdown', (e) => (down = [e.clientX, e.clientY]));
+canvas.addEventListener('pointerup', (e) => {
+  if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5) return;
+  const r = canvas.getBoundingClientRect();
+  ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), cam);
+  const vis = meshes.filter((m) => shown(m) && m.material !== ghostMat);
+  const hits = ray.intersectObjects(vis, false).filter((h) => !S.section || h.point.y >= 0);
+  const hit = S.sel ? hits.find((h) => h.object.material !== fadeMat) : hits[0];
+  if (hit && !(S.sel && S.selGroup.includes(hit.object) && S.selGroup.length === 1)) selectPart(hit.object);
+  else if (!hit && (S.sel || S.home)) clearSelection();
+});
+$('#insOvw').addEventListener('click', (e) => {
+  const r = e.currentTarget.getBoundingClientRect();
+  ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), ovCam);
+  const hit = ray.intersectObject(tissue, false)[0];
+  const msg = $('#ovwMsg');
+  if (!hit) { msg.hidden = false; msg.textContent = 'Tap on the slide. Use Move > Overview park to bring it into view.'; setTimeout(() => (msg.hidden = true), 2200); return; }
+  const lp = tissue.worldToLocal(hit.point.clone()), rr = CM.rect, h = P.roi / 2;
+  S.roi.u = THREE.MathUtils.clamp(lp.x, rr[0] + h, rr[1] - h); S.roi.v = THREE.MathUtils.clamp(lp.y, rr[2] + h, rr[3] - h);
+  S.tiles = []; S.cur = -1; drawOverlay(); updateTimes();
+  $('#st1').textContent = `centre ${fmt(S.roi.u, 1)}, ${fmt(S.roi.v, 1)} mm`;
+});
+
+// ---------- ui wiring
+function showTab(k) {
+  if (k !== 'build' && S.build !== null && k !== 'part') exitBuild();
+  document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === k)));
+  document.querySelectorAll('.pane').forEach((p) => (p.hidden = p.id !== 'tab-' + k));
+}
+document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => showTab(t.dataset.tab)));
+for (const [id, lo, hi] of [['sx', ...P.x_travel], ['sy', ...P.y_travel], ['sz', ...P.z_travel]]) {
+  const el = $('#' + id); el.min = lo; el.max = hi;
+  el.addEventListener('input', () => setPose(+$('#sx').value, +$('#sy').value, +$('#sz').value));
+}
+document.querySelectorAll('[data-dz]').forEach((b) => b.addEventListener('click', () => setPose(S.x, S.y, S.z + +b.dataset.dz)));
+$('#autofocus').addEventListener('click', () => {
+  if (S.run) return;
+  S.run = { Q: [actZ(0.15, 'Autofocus: sweeping up'), actZ(-0.15, 'Autofocus: sweeping down'), actZ(0, 'Autofocus: best focus found')], i: 0, a: null, marks: {}, mini: true };
+});
+$('#dofTxt').textContent = Math.round(DOF);
+$('#objCap').textContent = `Main camera, ${FW.toFixed(2)} x ${FH.toFixed(2)} mm`;
+new ResizeObserver(() => { $('#objScale i').style.width = Math.round($('#insObj').clientWidth * 0.5 / FW) + 'px'; }).observe($('#insObj'));
+const PRE = [['Home', 0, 0, 0], ['Overview park', OV.park_sx, 0, 0], ['Scan box centre', null, null, 0],
+  ['Far left, front', P.x_travel[0], P.y_travel[0], 0], ['Far right, back', P.x_travel[1], P.y_travel[1], 0], ['Focus full down', null, null, P.z_travel[0]]];
+for (const [n, x, y, z] of PRE) {
+  const b = document.createElement('button'); b.className = 'btn'; b.textContent = n;
+  b.addEventListener('click', () => jogTo(x === null ? (n.startsWith('Scan') ? -S.roi.u : S.x) : x, y === null ? (n.startsWith('Scan') ? -S.roi.v : S.y) : y, z));
+  $('#presets').appendChild(b);
+}
+$('#led').addEventListener('change', (e) => { S.led = e.target.checked; lights(); });
+$('#ring').addEventListener('change', (e) => { S.ring = e.target.checked; lights(); });
+$('#runScan').addEventListener('click', startScan);
+$('#stopScan').addEventListener('click', () => stopScan(false));
+$('#pauseScan').addEventListener('click', () => { S.paused = !S.paused; $('#pauseScan').textContent = S.paused ? 'Resume' : 'Pause'; });
+$('#clearTiles').addEventListener('click', () => { if (S.run) return; S.tiles = []; S.cur = -1; S.simT = 0; drawOverlay(); updateProg(); setStep(-1); for (let i = 0; i < 4; i++) $('#st' + i).textContent = ''; });
+document.querySelectorAll('#speed button').forEach((b) => b.addEventListener('click', () => {
+  S.speed = +b.dataset.s; document.querySelectorAll('#speed button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+}));
+$('#explode').addEventListener('input', (e) => setExplode(+e.target.value));
+$('#section').addEventListener('change', (e) => { S.section = e.target.checked; dirty = true; });
+$('#beam').addEventListener('change', (e) => { S.beamOn = e.target.checked; updateVis(); });
+$('#edges').addEventListener('change', applyMats);
+
+// layers
+const LCOL = ['#8f99a6', '#f0bd2e', '#5f86cc', '#d48a52', '#d9c062', '#3d9c88', '#9a6fd6'];
+D.layers.forEach((name, k) => {
+  const ps = D.parts.filter((p) => p.layer === k), mass = ps.reduce((s, p) => s + p.mass, 0);
+  const row = document.createElement('label'); row.className = 'layer toggle';
+  row.innerHTML = `<input type="checkbox" checked id="ly${k}"><span class="sw" style="background:${LCOL[k]}"></span><span></span><small>${ps.length} parts, ${Math.round(mass)} g</small>`;
+  row.children[2].textContent = name;
+  row.querySelector('input').addEventListener('change', (e) => { S.layerOn[k] = e.target.checked; updateVis(); });
+  $('#layerList').appendChild(row);
+});
+
+// parts catalogue
+function renderList() {
+  const pl = $('#partList'); pl.innerHTML = '';
+  const cats = S.cat ? [S.cat] : ['printed', 'mech', 'elec'];
+  for (const c of cats) {
+    const names = Object.keys(uniq).filter((n) => uniq[n][0].cat === c);
+    const subs = [...new Set(names.map((n) => uniq[n][0].sub))];
+    const d = document.createElement('details'); d.open = !!S.cat;
+    const cnt = names.reduce((s, n) => s + uniq[n].length, 0);
+    d.innerHTML = `<summary><span class="catdot" style="background:${CAT_COL[c]}"></span></summary><div class="plist"></div>`;
+    d.querySelector('summary').append(`${CAT_TXT[c]}: ${names.length} kinds, ${cnt} pieces`);
+    const box_ = d.querySelector('.plist');
+    for (const sb of subs) {
+      const h = document.createElement('div'); h.className = 'cat'; h.style.marginTop = '6px'; h.textContent = sb; box_.appendChild(h);
+      names.filter((n) => uniq[n][0].sub === sb).forEach((n) => {
+        const p = uniq[n][0], q = uniq[n].length;
+        const b = document.createElement('button'); b.dataset.name = n;
+        b.innerHTML = '<em></em><span></span>'; b.firstChild.textContent = (q > 1 ? q + ' x ' : '') + n;
+        b.lastChild.textContent = p.pr ? (p.pr.grams * q < 1 ? '<1 g' : `${Math.round(p.pr.grams * q)} g`) : (p.buy && p.buy.unit ? tl(p.buy.unit * q) : '');
+        b.addEventListener('click', () => selectPart(meshes[p.id], { all: true }));
+        box_.appendChild(b);
+      });
+    }
+    pl.appendChild(d);
+  }
+  const notes = { '': 'Everything shown. Pick a type to see only those parts in the 3D model.',
+    printed: `${Object.keys(uniq).filter((n) => uniq[n][0].cat === 'printed').length} different printed parts, about ${Math.round(Object.values(uniq).filter((a) => a[0].cat === 'printed').reduce((s, a) => s + a[0].pr.grams * a.length, 0))} g of filament. All STLs come rotated for printing, no supports.`,
+    mech: 'Bought parts with no wiring: rods, bearings, lead screws, nuts, couplings, springs, the base plate and the optics. These set the precision, so they are not printed.',
+    elec: 'Everything that needs a wire: motors, endstops, LEDs, cameras, the Uno and the Pi. Drivers, power supplies and cables are in the shopping list but not drawn.' };
+  $('#catNote').textContent = notes[S.cat];
+}
+document.querySelectorAll('#catSeg button').forEach((b) => b.addEventListener('click', () => {
+  S.cat = b.dataset.c; document.querySelectorAll('#catSeg button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  if (S.build !== null) exitBuild();
+  renderList(); applyMats();
+}));
+renderList();
+{
+  const stores = [...new Set(D.shop.map((r) => r.store))];
+  let html = '<tr><th>Qty</th><th>Item</th><th style="text-align:right">TL</th></tr>', chosen = 0, all = 0;
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  for (const st of stores) {
+    const rows = D.shop.filter((r) => r.store === st), sub = rows.reduce((s, r) => s + r.total, 0);
+    html += `<tr><td colspan="3" class="cat" style="padding-top:10px">${esc(st)}</td></tr>`;
+    html += rows.map((r) => { all += r.total; if (r.status === 'chosen') chosen += r.total;
+      const name = r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.item)}</a>` : esc(r.item);
+      return `<tr><td class="q">${r.qty} x</td><td>${name} <span class="st st-${r.status}">${D.status_txt[r.status]}</span><br><span style="color:var(--muted);font-size:11px">step ${esc(r.step)}${r.note ? ', ' + esc(r.note) : ''}</span></td><td class="n">${r.total ? tl(r.total) : '?'}</td></tr>`; }).join('');
+    html += `<tr class="tot"><td></td><td>${esc(st)} subtotal</td><td class="n">${tl(sub)}</td></tr>`;
+  }
+  html += `<tr class="tot"><td></td><td>Everything incl. estimates</td><td class="n">${tl(all)}</td></tr>`;
+  $('#shop').innerHTML = html;
+  $('#shopNote').textContent = `Budget ${tl(D.budget_tl)} ($350). Chosen so far ${tl(chosen)}; everything including estimates ${tl(all)}, ${all <= D.budget_tl ? tl(D.budget_tl - all) + ' under' : tl(all - D.budget_tl) + ' over'} budget.`;
+  $('#hwTbl').innerHTML = hwRows(D.hw);
+}
+
+// build steps
+function showStep(n) {
+  S.build = n; S.cat = ''; document.querySelectorAll('#catSeg button').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.c === '')));
+  const st = D.steps[n], ps = D.parts.filter((p) => p.step === n + 1);
+  $('#bNo').textContent = `Step ${n + 1} of ${D.steps.length}`; $('#bTitle').textContent = st.title; $('#bText').textContent = st.text;
+  const groups = {};
+  ps.forEach((p) => { groups[p.name] = groups[p.name] || { p, q: 0 }; groups[p.name].q++; });
+  $('#bParts').innerHTML = Object.values(groups).map(({ p, q }) => `<tr><td class="q">${q} x</td><td><span class="catdot" style="background:${CAT_COL[p.cat]}"></span>${p.name}</td></tr>`).join('');
+  const hw = {};
+  ps.forEach((p) => Object.entries(p.hw || {}).forEach(([k, v]) => (hw[k] = (hw[k] || 0) + v)));
+  $('#bHw').innerHTML = hwRows(hw);
+  $('#bPrev').disabled = n === 0; $('#bNext').disabled = n === D.steps.length - 1;
+  S.hl = Object.keys(groups); S.hlMode = 'glow'; S.sel = null; S.selGroup = []; S.home = null; $('#tag').hidden = true; applyMats(); updateVis();
+  if (n === 7 || n === 8 || n === 9) goView('iso'); 
+}
+function exitBuild() { S.build = null; S.hl = null; S.hlMode = 'ghost'; applyMats(); updateVis(); }
+function insets(on) { $('#insObj').hidden = !on; $('#insOvw').hidden = !on; dirty = true; }
+$('#bPrev').addEventListener('click', () => showStep(Math.max(0, (S.build ?? 0) - 1)));
+$('#bNext').addEventListener('click', () => showStep(Math.min(D.steps.length - 1, (S.build ?? -1) + 1)));
+$('#bAll').addEventListener('click', () => { exitBuild(); $('#bNo').textContent = 'Whole scanner'; $('#bTitle').textContent = 'All 11 steps done'; $('#bText').textContent = 'Press Next or Previous to walk through the build again.'; $('#bParts').innerHTML = ''; $('#bHw').innerHTML = hwRows(D.hw); });
+document.querySelector('.tab[data-tab="build"]').addEventListener('click', () => { if (S.build === null) showStep(0); });
+
+// checks
+const counts = { PASS: 0, WARN: 0, FAIL: 0, INFO: 0 };
+CH.items.forEach((c) => counts[c.status]++);
+const sum = $('#summary');
+for (const s of ['PASS', 'WARN', 'FAIL']) {
+  const b = document.createElement('button'); b.className = 'chip s-' + s; b.innerHTML = `<i></i>${counts[s]} ${s.toLowerCase()}`;
+  b.addEventListener('click', () => showTab('checks')); sum.appendChild(b);
+}
+const tot = D.parts.reduce((s, p) => s + p.mass, 0);
+const meta = document.createElement('span'); meta.className = 'meta'; meta.textContent = `${D.parts.length} parts, ${(tot / 1000).toFixed(2)} kg, built ${D.built}`; sum.appendChild(meta);
+$('#checkLead').textContent = `${CH.items.length} checks run on the model: collisions over the full travel and inside every assembly, the light path through every layer, rod sag, drive margins, printability without supports, the cut list, column stiffness, the overview camera and scan time. Tap one to read it; Show in 3D moves the stage to the worst case and highlights the parts.`;
+const order = ['FAIL', 'WARN', 'PASS', 'INFO'];
+const cats = [...new Set(CH.items.map((c) => c.cat))];
+for (const cat of cats) {
+  const h = document.createElement('div'); h.className = 'cat'; h.textContent = cat; $('#checkList').appendChild(h);
+  CH.items.filter((c) => c.cat === cat).sort((a, b) => order.indexOf(a.status) - order.indexOf(b.status)).forEach((c) => {
+    const el = document.createElement('div'); el.className = 'check';
+    el.innerHTML = `<button aria-expanded="false"><span class="pill s-${c.status}">${c.status}</span><span class="t"></span><span class="v"></span></button><div class="d" hidden><p></p></div>`;
+    el.querySelector('.t').textContent = c.title;
+    el.querySelector('.v').textContent = c.value + (['action', 'measure'].includes(c.limit) ? ', action needed' : c.limit ? `, target ${c.limit}` : '');
+    el.querySelector('.d p').textContent = c.detail;
+    if (c.pose || (c.parts && c.parts.length)) {
+      const b = document.createElement('button'); b.className = 'btn'; b.textContent = 'Show in 3D'; b.style.justifySelf = 'start';
+      b.addEventListener('click', () => {
+        if (S.build !== null) exitBuild();
+        S.sel = null; S.hl = c.parts && c.parts.length ? c.parts : null; S.hlMode = 'ghost'; applyMats();
+        const tgt = meshes.filter((m) => (c.parts || []).includes(m.userData.part.name));
+        S.sel = null; S.selGroup = [];
+        if (c.pose) jogTo(c.pose[0], c.pose[1], c.pose[2], () => { if (tgt.length) { focusOn(tgt); applyMats(); } });
+        else if (tgt.length) { focusOn(tgt); applyMats(); }
+        $('#phase').textContent = c.title;
+        if (c.id === 'beam' || c.id === 'baffles') { $('#section').checked = true; S.section = true; }
+      });
+      el.querySelector('.d').appendChild(b);
+    }
+    const head = el.querySelector('button');
+    head.addEventListener('click', () => { const d = el.querySelector('.d'); d.hidden = !d.hidden; head.setAttribute('aria-expanded', String(!d.hidden)); });
+    $('#checkList').appendChild(el);
+  });
+}
+
+// time table
+function updateTimes() {
+  const n = SC.nx * SC.ny, per = SC.tmove_x + P.settle_s + P.capture_s;
+  const rows = [[`${n} tiles (${SC.nx} x ${SC.ny}), ${Math.round(per * 1000)} ms each`, SC.t_tiles], ['Focus map, 4 points', SC.t_focus], ['Overview photo and moves', SC.t_over]];
+  $('#timeTbl').innerHTML = rows.map(([a, b]) => `<tr><td>${a}</td><td class="n">${fmtT(b)}</td></tr>`).join('') +
+    `<tr class="tot"><td>Total, limit ${fmtT(P.time_limit_s)}</td><td class="n">${fmtT(SC.t_total)}</td></tr>`;
+}
+updateTimes();
+
+// theme
+theme();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', theme);
+new MutationObserver(theme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+document.fonts && document.fonts.ready.then(drawOverlay);
+
+// ---------- loop
+setPose(0, 0, 0); lights(); drawOverlay(); updateProg(); resize();
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  let anim = false;
+  if (camAnim) {
+    camAnim.t = Math.min(1, camAnim.t + dt / 0.8); const k = 1 - Math.pow(1 - camAnim.t, 3);
+    cam.position.lerpVectors(camAnim.p0, camAnim.p1, k); controls.target.lerpVectors(camAnim.t0, camAnim.t1, k);
+    if (camAnim.t >= 1) camAnim = null; anim = true;
+  }
+  if (jog) {
+    jog.t = Math.min(jog.T, jog.t + dt); const k = 0.5 - 0.5 * Math.cos(Math.PI * jog.t / jog.T);
+    setPose(jog.x0 + (jog.x - jog.x0) * k, jog.y0 + (jog.y - jog.y0) * k, jog.z0 + (jog.z - jog.z0) * k);
+    if (jog.t >= jog.T) { const f = jog.after; jog = null; f && f(); }
+  }
+  if (S.run) {
+    if (S.run.mini) {
+      const R = S.run; let d = dt * 4;
+      while (d > 0 && R.i < R.Q.length) { if (!R.a) { prepare(R.Q[R.i]); R.a = R.Q[R.i]; } d = stepAct(R.a, d); $('#phase').textContent = R.a.label; if (R.a.t >= R.a.T - 1e-9) { R.a = null; R.i++; } }
+      if (R.i >= R.Q.length) S.run = null;
+    } else tickScan(dt);
+    anim = !S.paused || S.run?.mini;
+  }
+  if (controls.update()) anim = true;
+  if (dirty || anim) { renderAll(); dirty = false; }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>

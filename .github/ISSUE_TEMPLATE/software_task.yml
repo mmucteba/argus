@@ -1,0 +1,29 @@
+name: Software task
+description: One software module, tested without hardware
+title: "[software] <module>: <goal>"
+labels: [software]
+body:
+  - type: markdown
+    attributes:
+      value: See software/README.md for the module list and the data formats. Assign yourself before you start.
+  - type: input
+    id: module
+    attributes:
+      label: Module
+      description: folder under software/, like scan_planner
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal and interface
+      description: what goes in, what comes out, which fake replaces the hardware
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: tests that must pass
+    validations:
+      required: true

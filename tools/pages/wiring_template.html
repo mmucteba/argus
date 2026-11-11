@@ -1,0 +1,224 @@
+<title>ARGUS Wiring</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Saira+Condensed:wght@600;700&display=swap">
+<style>
+/* layout: bench reference sheet. diagram on top, then the order of work, the wire list, and the numbers to dial in */
+:root {
+  --bg: #eef0f4; --surface: #ffffff; --ink: #1a1c25; --muted: #5b6070; --line: #d9dce5; --accent: #5a3ea6; --accent-soft: #ece7f8;
+  --ok: #23744a; --ok-bg: #dcefe4; --warn: #915c10; --warn-bg: #f5e8cf; --info: #4a5170; --info-bg: #e3e6ef;
+  --w12: #c62f2f; --w5: #d47108; --wgnd: #2c2f3a; --wsig: #1b78a3; --wdata: #8a3fa6; --wmot: #2f7d4f; --code: #f4f5f9;
+  --f-display: "Saira Condensed", "Arial Narrow", sans-serif; --f-body: "IBM Plex Sans", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1117; --surface: #171a23; --ink: #e6e7ee; --muted: #9a9fb1; --line: #2a2f3c; --accent: #a48cff; --accent-soft: #2a2347;
+  --ok: #62c891; --ok-bg: #15301f; --warn: #e9b45a; --warn-bg: #36290f; --info: #aab2d0; --info-bg: #232838;
+  --w12: #ff6b6b; --w5: #ffa54a; --wgnd: #c9ccd8; --wsig: #5cc0e8; --wdata: #d08cf0; --wmot: #62c891; --code: #11141b; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1117; --surface: #171a23; --ink: #e6e7ee; --muted: #9a9fb1; --line: #2a2f3c; --accent: #a48cff; --accent-soft: #2a2347;
+  --ok: #62c891; --ok-bg: #15301f; --warn: #e9b45a; --warn-bg: #36290f; --info: #aab2d0; --info-bg: #232838;
+  --w12: #ff6b6b; --w5: #ffa54a; --wgnd: #c9ccd8; --wsig: #5cc0e8; --wdata: #d08cf0; --wmot: #62c891; --code: #11141b; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.45; margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 22px; }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: 34px; letter-spacing: 0.04em; margin: 0; line-height: 1; text-wrap: balance; }
+h1 span { color: var(--accent); }
+h2 { font-family: var(--f-display); font-weight: 600; font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+h3 { font-size: 15px; margin: 0; font-weight: 600; }
+.sub { color: var(--muted); margin: 6px 0 0; max-width: 70ch; }
+a { color: var(--accent); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.stack { display: grid; gap: 16px; min-width: 0; }
+@media (max-width: 820px) { .two { grid-template-columns: minmax(0, 1fr); } }
+
+/* diagram */
+.dg { overflow-x: auto; }
+.dg svg { display: block; width: 100%; min-width: 900px; height: auto; }
+.w { fill: none; stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
+.w.w12 { stroke: var(--w12); } .w.w5 { stroke: var(--w5); } .w.sig { stroke: var(--wsig); }
+.w.data { stroke: var(--wdata); } .w.mot { stroke: var(--wmot); stroke-width: 5; } .w.dash { stroke-dasharray: 6 5; }
+.blk rect { fill: var(--surface); stroke: var(--line); stroke-width: 1.2; }
+.blk.big rect { stroke: var(--muted); }
+.blk.dash rect { stroke-dasharray: 5 4; }
+.bt { font: 600 13px var(--f-body); fill: var(--ink); }
+.bs, .pin { font: 400 10.5px var(--f-mono); fill: var(--muted); }
+.port { font: 500 10.5px var(--f-mono); fill: var(--ink); }
+.wl { font: 500 10.5px var(--f-mono); fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+.gnd line { stroke: var(--wgnd); stroke-width: 1.3; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 10px; font-size: 12.5px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.sw { display: inline-block; width: 18px; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: 8px; border-radius: 2px; }
+.sw.w12 { border-color: var(--w12); } .sw.w5 { border-color: var(--w5); } .sw.gnd { border-color: var(--wgnd); }
+.sw.sig { border-color: var(--wsig); } .sw.data { border-color: var(--wdata); } .sw.mot { border-color: var(--wmot); border-top-width: 5px; }
+
+/* lists */
+ol.steps { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+ol.steps li::marker { font-family: var(--f-mono); color: var(--muted); }
+code, .mono { font-family: var(--f-mono); font-size: 12.5px; }
+code { background: var(--code); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; white-space: nowrap; }
+ul.parts { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+ul.parts li { display: grid; grid-template-columns: 9.5em minmax(0, 1fr); gap: 10px; align-items: start; padding: 7px 0; border-bottom: 1px solid var(--line); }
+ul.parts li:last-child { border-bottom: 0; }
+.pi small { display: block; color: var(--muted); font-size: 12px; }
+.st { font-family: var(--f-mono); font-size: 11px; padding: 2px 7px; border-radius: 4px; white-space: nowrap; justify-self: start; }
+.st-chosen { background: var(--ok-bg); color: var(--ok); } .st-check, .st-quote { background: var(--warn-bg); color: var(--warn); }
+.st-borrow { background: var(--accent-soft); color: var(--accent); } .st-later { background: var(--info-bg); color: var(--info); }
+
+/* tables */
+.tbl { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 7px 10px 7px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr.grp th { padding-top: 16px; color: var(--ink); font-family: var(--f-display); font-size: 15px; letter-spacing: 0.06em; text-transform: uppercase; }
+td.num { font-family: var(--f-mono); color: var(--muted); width: 2.5em; font-variant-numeric: tabular-nums; }
+td.note { color: var(--muted); font-size: 12.5px; }
+.wires td:nth-child(2) { white-space: nowrap; }
+.wires { min-width: 760px; }
+.grbl td.k { font-family: var(--f-mono); width: 4em; }
+.grbl td.v { font-family: var(--f-mono); width: 5em; text-align: right; padding-right: 16px; font-variant-numeric: tabular-nums; }
+
+/* drivers */
+.drv { display: grid; gap: 12px; }
+.card { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 8px; }
+.card .row { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; }
+.jp { display: inline-flex; gap: 4px; font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+.jp b { display: grid; place-items: center; width: 30px; height: 22px; border: 1.5px solid var(--muted); border-radius: 3px; font-weight: 500; }
+.jp b.on { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.big { font-family: var(--f-mono); font-size: 18px; font-variant-numeric: tabular-nums; }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; font-size: 13px; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; }
+pre { background: var(--code); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; margin: 0; overflow-x: auto;
+  font-family: var(--f-mono); font-size: 12.5px; line-height: 1.5; }
+.btn { font: 500 13px var(--f-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hd { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 12px; margin-bottom: 10px; }
+.hd h2 { margin: 0; }
+.warn { background: var(--warn-bg); color: var(--warn); border-radius: 6px; padding: 8px 10px; font-size: 13px; }
+.budget td.n { font-family: var(--f-mono); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>ARGUS <span>T18</span> wiring</h1>
+    <p class="sub">Every wire from the 12 V adapter to the camera for model v0.3 (Raspberry Pi 3B+, zoom lens, GRBL on the Uno). __NWIRES__ connections. Updated 8 Nov 2026.</p>
+  </header>
+
+  <section class="panel">
+    <h2>System</h2>
+    <div class="dg">__SVG__</div>
+    <div class="legend">
+      <span><i class="sw w12"></i>12 V</span><span><i class="sw w5"></i>5 V</span><span><i class="sw mot"></i>motor, 4 wires</span>
+      <span><i class="sw sig"></i>logic signal</span><span><i class="sw data"></i>USB, camera, network</span>
+      <span>Ground wires are not drawn: every block with the ground mark joins the GND Wago.</span>
+    </div>
+  </section>
+
+  <section class="two">
+    <div class="panel">
+      <h2>First power-up, in this order</h2>
+      <ol class="steps">
+        <li>Buck alone: 12 V on, nothing on its output, turn the LM2596 screw until OUT reads <b>5.0 V</b>. Power off.</li>
+        <li>28BYJ-48 bipolar mod: lift the blue cap, cut the trace joining the two centre taps. Orange to pink and yellow to blue should each read one coil; leave red unconnected.</li>
+        <li>Drivers into the shield with the driver's <b>EN</b> pin on the <b>EN</b> mark. Set the microstep jumpers. Plug the motors in. Never plug or unplug a motor with 12 V on.</li>
+        <li>12 V on and the Pi's USB to the Uno. Set Vref, measured from the potentiometer to GND: DRV8825 <b>0.50 V</b>, A4988 by its sense resistor (below).</li>
+        <li>Flash GRBL 1.1 with the one-line homing edit, then paste the settings.</li>
+        <li>Send <code>?</code>. Push paper into each fork: <code>Pn:X</code> and <code>Pn:Y</code> must show only while blocked. If it is the other way round, set <code>$5=1</code>.</li>
+        <li>Jog 1 mm per axis with <code>$J=G91 X1 F300</code>. Wrong way: flip that axis bit in <code>$3</code>.</li>
+        <li>Home with <code>$H</code>. Then <code>M8</code> turns the bottom LED on and <code>M9</code> off.</li>
+        <li>Pi: ring test at 20 % brightness, then <code>rpicam-hello --list-cameras</code> should list <b>imx477</b>.</li>
+      </ol>
+    </div>
+    <div class="panel">
+      <h2>Parts for the wiring</h2>
+      <ul class="parts">__PARTS__</ul>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Wire list</h2>
+    <div class="tbl"><table class="wires">
+      <thead><tr><th>#</th><th>From</th><th>To</th><th>Notes</th></tr></thead>
+      <tbody>__WIRES__</tbody>
+    </table></div>
+  </section>
+
+  <section class="two">
+    <div class="panel">
+      <h2>Driver setup</h2>
+      <div class="drv">
+        <div class="card">
+          <div class="row"><h3>X and Y · DRV8825</h3><span class="jp"><b>M0</b><b>M1</b><b class="on">M2</b></span><span class="mono">1/16 step</span></div>
+          <div class="row"><span class="big">Vref 0.50 V</span><span class="mono">I = 2 x Vref = 1.0 A</span></div>
+          <p class="note" style="margin:0;color:var(--muted);font-size:12.5px">17HS4401 is rated 1.5 A; 1.0 A keeps the motors cool with a 15x torque margin. Stick the heatsink on. The DRV8825 needs 12 V on to read Vref.</p>
+        </div>
+        <div class="card">
+          <div class="row"><h3>Z · A4988</h3><span class="jp"><b class="on">M0</b><b>M1</b><b>M2</b></span><span class="mono">1/2 step</span></div>
+          <div class="row"><span class="big">0.1 A target</span><span class="mono">Vref = 8 x Rs x I</span></div>
+          <dl class="kv">
+            <dt>R100 printed</dt><dd class="mono">Vref 0.08 V</dd>
+            <dt>R068</dt><dd class="mono">Vref 0.054 V</dd>
+            <dt>R050</dt><dd class="mono">Vref 0.04 V</dd>
+          </dl>
+          <p class="note" style="margin:0;color:var(--muted);font-size:12.5px">Read the tiny resistor next to the chip. The 28BYJ coil limits the current on its own too, so near the bottom of the pot is fine. 4076 half-steps per turn and the 0.7 mm M4 thread give __ZSTEPS__ steps/mm, 0.17 um each.</p>
+        </div>
+        <p class="note" style="margin:0;color:var(--muted);font-size:12.5px">The A socket stays empty, no clone jumpers.</p>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="panel">
+        <h2>Power budget</h2>
+        <div class="tbl"><table class="budget">
+          <thead><tr><th>Rail</th><th>Loads</th><th class="n" style="text-align:right">Peak</th></tr></thead>
+          <tbody>
+            <tr><td>12 V, 3 A adapter</td><td>2 NEMA17 at 1.0 A phase, 28BYJ, buck input</td><td class="n">about 2.0 A</td></tr>
+            <tr><td>5 V, LM2596</td><td>LED card about 0.7 A or ring up to 0.7 A at 50 % white, never both; endstops and 74HCT125 0.05 A</td><td class="n">about 0.8 A</td></tr>
+            <tr><td>Pi, 5.1 V 2.5 A</td><td>Pi 3B+, Uno logic, overview camera later</td><td class="n">about 1.3 A</td></tr>
+          </tbody>
+        </table></div>
+        <p class="warn" style="margin:10px 0 0">Cap the ring at 50 % in software: 24 LEDs at full white draw about 1.4 A.</p>
+      </div>
+      <div class="panel">
+        <h2>Pi setup</h2>
+        <pre># /boot/firmware/config.txt
+dtparam=spi=on
+core_freq=250      # pi 3: keeps the spi clock right for the ring</pre>
+        <p style="margin:10px 0 0;font-size:13px">Add the user to the <code>gpio</code> group so the ring runs without root. Python: <code>picamera2</code> (preinstalled), <code>pyserial</code> for GRBL at 115200 baud, <code>rpi_ws281x</code> in SPI mode on GPIO10.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="hd"><h2>GRBL 1.1 settings</h2><button class="btn" id="copy" type="button">Copy settings</button></div>
+    <p style="margin:0 0 10px;font-size:13px;max-width:75ch">Before uploading <code>grblUpload</code> from the Arduino IDE, edit <code>config.h</code> so homing skips Z (there is no Z switch). Then paste the settings into the serial console at 115200 baud.</p>
+    <pre>#define HOMING_CYCLE_0 ((1&lt;&lt;X_AXIS)|(1&lt;&lt;Y_AXIS))
+// #define HOMING_CYCLE_1 ((1&lt;&lt;X_AXIS)|(1&lt;&lt;Y_AXIS))</pre>
+    <pre id="grbltxt" hidden style="margin-top:10px">__GRBL_TXT__</pre>
+    <p id="copied" class="mono" style="margin:8px 0 0;color:var(--ok)" hidden>Copied.</p>
+    <div class="two" style="margin-top:12px">
+      <div class="tbl"><table class="grbl">
+        <thead><tr><th>Setting</th><th style="text-align:right;padding-right:16px">Value</th><th>Why</th></tr></thead>
+        <tbody>__GRBL_ROWS__</tbody>
+      </table></div>
+      <div class="tbl"><table class="grbl">
+        <thead><tr><th>Setting</th><th style="text-align:right;padding-right:16px">Value</th><th>Why</th></tr></thead>
+        <tbody>__GRBL_ROWS2__</tbody>
+      </table></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const btn = document.getElementById('copy'), pre = document.getElementById('grbltxt'), ok = document.getElementById('copied');
+btn.addEventListener('click', () => {
+  const t = pre.textContent;
+  const show = () => { pre.hidden = false; const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); };
+  try {
+    navigator.clipboard.writeText(t).then(() => { ok.hidden = false; setTimeout(() => (ok.hidden = true), 2500); }, show);
+  } catch (e) { show(); }
+});
+</script>

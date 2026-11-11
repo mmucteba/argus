@@ -1,0 +1,487 @@
+# bill of materials, single source for the parts page, the viewer price tags and the wiring page
+# status: chosen, check, quote, borrow, later; unit_tl includes VAT as seen on the store page
+budget_tl: 17426.5
+status_txt:
+  chosen: Chosen
+  check: Check before buying
+  quote: Request a quote
+  borrow: Borrow first
+  later: Still to pick
+items:
+- key: rod
+  step: 3, 5, 8
+  store: Robolink
+  item: 8 mm krom kaplı indüksiyonlu mil, 250 mm
+  url: https://www.robolinkmarket.com/8mm-krom-kapli-induksiyonlu-mil-250mm
+  unit_tl: 94.5
+  qty: 4
+  status: chosen
+  note: 'CK55, HRC 62, h7. Cut: 2 x 219 (X), 2 x (108 Y + 100 Z)'
+- key: LM8UU_sp
+  step: 3, 5, 8
+  store: Robolink
+  item: LM8UU lineer rulman (spares)
+  url: https://www.robolinkmarket.com/3d-yazici-rulman-lm8uu
+  unit_tl: 85.5
+  qty: 2
+  status: chosen
+  note: spares for the PRC 10-pack
+- key: T8 screw
+  step: 4, 6
+  store: Robolink
+  item: T8 trapez vidalı mil 400 mm, lead 8 (4 start)
+  url: https://www.robolinkmarket.com/3d-yazici-vidali-mil-somun-400mm-trapez-t8-8mm
+  unit_tl: 466.5
+  qty: 1
+  status: chosen
+  note: cut X 196 + Y 94; plain brass nut included (spare)
+- key: '608'
+  step: 4, 6
+  store: Robolink
+  item: 608ZZ rulman
+  url: https://www.robolinkmarket.com/3d-yazici-rulmani-608zz
+  unit_tl: 15.0
+  qty: 3
+  status: chosen
+  note: 8 x 22 x 7, free end of the screws
+- key: T8 nut
+  step: 4, 6
+  store: Robolink
+  item: T8 yaylı trapez somun, lead 8 (start 4)
+  url: https://www.robolinkmarket.com/arama?q=t8+yayl%C4%B1+trapez+somun
+  unit_tl: 151.5
+  qty: 2
+  status: chosen
+  note: pick "T8 Yaylı Trapez Somun" (lead 8), NOT the 2 hatve one
+- key: endstop
+  step: 4, 6
+  store: Robolink
+  item: Optik limit switch - endstop
+  url: https://www.robolinkmarket.com/optical-endstop-switch-red
+  unit_tl: 79.5
+  qty: 3
+  status: chosen
+  note: X, Y + 1 spare (can become Z home later); cable included
+- key: NEMA17
+  step: 4, 6
+  store: Robolink
+  item: 17HS4401 NEMA17 step motor (Dupont kablo dahil)
+  url: https://www.robolinkmarket.com/17hs4401-nema17-step-motor
+  unit_tl: 360.0
+  qty: 2
+  status: check
+  note: SAMM is out of stock now, so moved here; stock flips, 17HS4401S is the same motor
+- key: LM8UU
+  step: 3, 5, 8
+  store: Trendyol
+  item: PRC LM8UU lineer rulman 8x15x24 (10 adet)
+  url: https://www.trendyol.com/prc/lm-08-uu-lineer-rulman-8x15x24-10-adet-p-885513950
+  unit_tl: 499.9
+  qty: 1
+  status: chosen
+  note: 4 X + 4 Y + 2 focus
+- key: heatsink
+  step: '2'
+  store: robotus
+  item: Alüminyum soğutucu 20 x 15 x 10 mm
+  url: https://www.robotus.net/aluminum-heatsink-20x10x15-sogutucu-blok
+  unit_tl: 0
+  qty: 1
+  status: chosen
+  note: price not noted; LED only on during scans; test 5 min run
+- key: LED
+  step: '2'
+  store: Robotistan
+  item: Sürücülü 3 W power LED kartı
+  url: https://www.robotistan.com/suruculu-3w-power-led-karti
+  unit_tl: 74.41
+  qty: 2
+  status: chosen
+  note: 5 V from the buck, SIG from GRBL CoolEn (A3); 1 spare; check stock
+- key: buck
+  step: 2, 11
+  store: Robotistan
+  item: LM2596 voltaj düşürücü 3 A
+  url: https://www.robotistan.com/arama?q=LM2596
+  unit_tl: 69.24
+  qty: 1
+  status: chosen
+  note: set to 5.0 V before connecting; LED card, ring, endstops
+- key: coupling
+  step: 4, 6
+  store: Robotistan
+  item: Esnek kaplin 5 x 8 mm D19L25
+  url: https://www.robotistan.com/esnek-kaplin-5-8mm-d19l25
+  unit_tl: 68.02
+  qty: 2
+  status: chosen
+  note: ''
+- key: BYJ
+  step: '8'
+  store: Robotistan
+  item: 28BYJ-48 redüktörlü step motor + ULN2003
+  url: https://www.robotistan.com/28-byj-48-reducer-step-motor-and-uln2003a-step-motor-driver-board
+  unit_tl: 102.64
+  qty: 2
+  status: chosen
+  note: focus motor, bipolar mod; 1 spare
+- key: A4988
+  step: '8'
+  store: Robotistan
+  item: A4988 2A step motor sürücü (orijinal çip)
+  url: https://www.robotistan.com/a4988-step-motor-driver-board-red
+  unit_tl: 135.44
+  qty: 1
+  status: chosen
+  note: Z slot; take the "Orijinal Çip" listing; current about 100 mA
+- key: A4988 hs
+  step: '8'
+  store: Robotistan
+  item: Mini soğutucu (A4988 uyumlu)
+  url: https://www.robotistan.com/arama?q=a4988+so%C4%9Futucu
+  unit_tl: 6.07
+  qty: 1
+  status: chosen
+  note: ''
+- key: ring
+  step: '9'
+  store: Robotistan
+  item: WS2812 NeoPixel 24'lü halka
+  url: https://www.robotistan.com/neopixel-24lu-halka
+  unit_tl: 83.21
+  qty: 1
+  status: chosen
+  note: 86.5 / 71.5 mm; holder done in v0.3
+- key: Uno
+  step: '11'
+  store: Robotistan
+  item: UNO R3 CH340 (USB kablolu)
+  url: https://www.robotistan.com/uno-r3-development-board-compatible-with-arduino-with-usb-cable-usb-chip-ch340
+  unit_tl: 239.3
+  qty: 1
+  status: chosen
+  note: runs GRBL 1.1; USB cable goes to the Pi
+- key: shield
+  step: '11'
+  store: Robotistan
+  item: UNO CNC Shield V3
+  url: https://www.robotistan.com/arduino-icin-uno-cnc-shield-v3-a4988-uyumlu
+  unit_tl: 111.75
+  qty: 1
+  status: chosen
+  note: V3, not V4
+- key: drv
+  step: '11'
+  store: Robotistan
+  item: DRV8825 step motor sürücü
+  url: https://www.robotistan.com/drv8825-step-motor-surucu-karti
+  unit_tl: 125.72
+  qty: 2
+  status: chosen
+  note: X and Y; jumper M2 only = 1/16; Vref 0.50 V = 1.0 A
+- key: dcjack
+  step: '11'
+  store: Robotistan
+  item: DC güç fişi 2.1 mm dişi, vidalı klemens
+  url: https://www.robotistan.com/arama?q=dc+g%C3%BC%C3%A7+fi%C5%9Fi+2.1mm
+  unit_tl: 10.32
+  qty: 1
+  status: chosen
+  note: 2.1 mm, matches the adapter plug
+- key: switch
+  step: '11'
+  store: Robotistan
+  item: KCD1 rocker switch
+  url: https://www.robotistan.com/arama?q=kcd1
+  unit_tl: 9.11
+  qty: 1
+  status: chosen
+  note: cuts the 12 V; also the emergency stop
+- key: jumper
+  step: '11'
+  store: Robotistan
+  item: Jumper kablo M-F 40 pin 20 cm
+  url: https://www.robotistan.com/arama?q=jumper+kablo
+  unit_tl: 52.23
+  qty: 1
+  status: chosen
+  note: LED SIG, ring data, Pi GPIO, 28BYJ to the Z header
+- key: Pi
+  step: '11'
+  store: Robotistan
+  item: Raspberry Pi 3 Model B+
+  url: https://www.robotistan.com/raspberry-pi-3-model-b-plus
+  unit_tl: 2578.2
+  qty: 1
+  status: chosen
+  note: 15-pin camera port, 4 USB, Ethernet, 5 GHz Wi-Fi, 1 GB
+- key: camcable
+  step: '9'
+  store: Robotistan
+  item: 50 cm Raspberry Pi kamera kablosu, FFC 15 pin
+  url: https://www.robotistan.com/50-cm-raspberry-pi-kamera-kablosu-ffc-15-pin-4b-3b-3b-3a-uyumlu
+  unit_tl: 41.47
+  qty: 1
+  status: chosen
+  note: HQ camera at the top of the column down to the Pi
+- key: led5
+  step: '10'
+  store: Robotistan
+  item: 5 mm beyaz LED + 220 ohm
+  url: https://www.robotistan.com/arama?q=5mm+beyaz+led
+  unit_tl: 3.0
+  qty: 2
+  status: later
+  note: overview light, with step 10
+- key: HQ
+  step: '9'
+  store: Robotsepeti
+  item: Raspberry Pi HQ kamera, C/CS mount (IMX477)
+  url: https://www.robotsepeti.com/raspberry-pi-hq-kamera-m12-yuvasiz-sc0870
+  unit_tl: 4593.41
+  qty: 1
+  status: check
+  note: title says C/CS but code SC0870 is the M12 version; we need SC0261 (round C/CS mount). Ask before paying
+- key: lens
+  step: '9'
+  store: devresel
+  item: Waveshare 100X endüstriyel mikroskop lensi, 0.12-1.8x, C/CS
+  url: https://www.devresel.com.tr/urun/waveshare-100x-endustriyel-mikroskop-lensi-raspberry-pi-hq-ve-global-shutter-kamera-uyumlu-c-cs-mount
+  unit_tl: 1990.0
+  qty: 1
+  status: chosen
+  note: replaces the 4x objective, tube and C-C ring; used at 1.8x, WD about 55 mm
+- key: adapter
+  step: '11'
+  store: direnc.net
+  item: 12 V 3 A adaptör, masa tipi, 5.5 x 2.1 mm
+  url: https://www.direnc.net/12v-3a-adaptor-masa-tipi
+  unit_tl: 300
+  qty: 1
+  status: check
+  note: price not shown; check the plug is 5.5 x 2.1 (not 2.5) and centre positive
+- key: psu
+  step: '11'
+  store: tbd
+  item: Raspberry Pi 3 adaptör 5.1 V 2.5 A, micro USB
+  url: https://www.hepsiburada.com/ara?q=raspberry+pi+3+adapt%C3%B6r+5v+2.5a
+  unit_tl: 250
+  qty: 1
+  status: later
+  note: official one is out of stock at Robotistan and direnc; any 5.1 V 2.5 A with a thick cable
+- key: sd
+  step: '11'
+  store: tbd
+  item: microSD 32 GB A1 (SanDisk Ultra)
+  url: https://www.hepsiburada.com/ara?q=sandisk+ultra+32gb+microsd+a1
+  unit_tl: 200
+  qty: 1
+  status: later
+  note: Raspberry Pi OS Lite 64-bit
+- key: shifter
+  step: 9, 11
+  store: tbd
+  item: 74HCT125 (or 74AHCT125) DIP-14 + 470 ohm + 1000 uF 16 V
+  url: https://www.direnc.net/arama?q=74hct125
+  unit_tl: 60
+  qty: 1
+  status: later
+  note: 'ring data 3.3 V to 5 V; Robotsepeti is out; fallback: set the buck to 4.6 V and skip the chip'
+- key: fuse
+  step: '11'
+  store: tbd
+  item: Ara tip sigorta yuvası 5 x 20 + 3 A sigorta
+  url: https://www.hepsiburada.com/ara?q=ara+sigorta+yuvas%C4%B1+5x20
+  unit_tl: 40
+  qty: 1
+  status: later
+  note: right after the DC jack, before the switch
+- key: wago
+  step: '11'
+  store: tbd
+  item: Wago 221-413 klemens (or a small terminal block)
+  url: https://www.hepsiburada.com/ara?q=wago+221-413
+  unit_tl: 30
+  qty: 3
+  status: later
+  note: 12 V +, 5 V +, GND distribution
+- key: wiring
+  step: '11'
+  store: tbd
+  item: 'Kablo: 20 AWG kırmızı + siyah 2 m, 22 AWG 3 renk, makaron seti'
+  url: https://www.hepsiburada.com/ara?q=22+awg+kablo+seti
+  unit_tl: 200
+  qty: 1
+  status: later
+  note: 20 AWG for 12 V, 22 AWG for 5 V and signals
+- key: eth
+  step: '11'
+  store: tbd
+  item: Ethernet kablosu Cat6 1 m
+  url: https://www.hepsiburada.com/ara?q=cat6+ethernet+kablosu+1m
+  unit_tl: 50
+  qty: 1
+  status: later
+  note: optional; Pi 5 GHz Wi-Fi also works; laptop may need a USB-Ethernet adapter
+- key: piheat
+  step: '11'
+  store: tbd
+  item: Raspberry Pi 3 soğutucu seti
+  url: https://www.hepsiburada.com/ara?q=raspberry+pi+3+so%C4%9Futucu
+  unit_tl: 40
+  qty: 1
+  status: later
+  note: optional, the Pi only captures and streams
+- key: thermal
+  step: '2'
+  store: tbd
+  item: Termal bant / termal macun
+  url: https://www.hepsiburada.com/ara?q=termal+macun
+  unit_tl: 50
+  qty: 1
+  status: later
+  note: LED card to heatsink
+- key: ovcam
+  step: '10'
+  store: tbd
+  item: USB kamera modülü 1080p, M12 lens (overview)
+  url: ''
+  unit_tl: 600
+  qty: 1
+  status: later
+  note: step 10 on hold; must focus at about 11 cm; estimate
+- key: base
+  step: '1'
+  store: Workshop
+  item: Plywood 300 x 270 x 18 mm
+  url: ''
+  unit_tl: 300
+  qty: 1
+  status: later
+  note: OSTİM / İvedik; drilling template in the print pack
+- key: hw
+  step: all
+  store: Hardware store
+  item: Screws, inserts, M4 rod + nuts, springs, zip ties
+  url: ''
+  unit_tl: 450
+  qty: 1
+  status: later
+  note: see the hardware list; estimate
+- key: pla
+  step: all
+  store: tbd
+  item: PLA filament (black + some white), about 500 g
+  url: ''
+  unit_tl: 671
+  qty: 1
+  status: later
+  note: 0 TL with department filament
+- key: diffuser
+  step: '2'
+  store: home
+  item: Baking paper diffuser (2-3 layers, 28 mm)
+  url: ''
+  unit_tl: 0
+  qty: 1
+  status: chosen
+  note: opal acrylic or printed disc later
+- key: feet
+  step: '1'
+  store: Hardware store
+  item: Rubber feet
+  url: ''
+  unit_tl: 25
+  qty: 4
+  status: later
+  note: ''
+- key: slide
+  step: '7'
+  store: Lab supply
+  item: Glass slides (50) + coverslips
+  url: ''
+  unit_tl: 200
+  qty: 1
+  status: later
+  note: estimate (BOM CA-02)
+hardware:
+- item: 'M3 heat-set insert (send the type: OD and length)'
+  qty: 32
+- item: M3 x 6 set screw
+  qty: 10
+- item: M3 x 6 screw
+  qty: 4
+- item: M3 x 8 screw
+  qty: 7
+- item: M3 x 10 screw
+  qty: 8
+- item: M3 x 12 screw
+  qty: 8
+- item: M3 x 16 screw
+  qty: 15
+- item: M3 x 60 screw
+  qty: 2
+- item: M3 nut
+  qty: 12
+- item: M2 x 6 screw
+  qty: 4
+- item: M2.5 x 8 screw
+  qty: 4
+- item: M4 threaded rod, stainless if possible (cut 61 mm)
+  qty: 1
+- item: M4 brass nut
+  qty: 1
+- item: M4 nut
+  qty: 4
+- item: M4 washer
+  qty: 1
+- item: M4 x 8 screw
+  qty: 2
+- item: Extension spring about 5 x 20 mm
+  qty: 1
+- item: Compression spring 5 x 10 mm (levelling)
+  qty: 3
+- item: Wood screw 4 x 16
+  qty: 23
+- item: Wood screw 4 x 20
+  qty: 7
+- item: Zip tie 2.5 mm, pack of 100
+  qty: 1
+redesign:
+- 'LED tower: fit the 23 x 30 mm LED card and the 20 x 15 x 10 heatsink (need a photo with a ruler and the hole positions)'
+- 'X endstop pedestal and vane: 32 x 10 x 21 mm sensor (need hole spacing and slot depth)'
+- 'Lens clamp and ring holder: built for a 39 mm barrel and 55 mm working distance at 1.8x. When the lens arrives, measure the height at best
+  focus, the barrel diameter and where the zoom ring sits'
+- 'Overview arm: USB camera module (step 10)'
+- 'Heat-set insert holes: match the insert type you buy'
+- 'Optional: Z home with the spare optical endstop (bracket on the column, flag on the focus carriage) so GRBL soft limits work on all three axes'
+free_shipping_tl:
+  Robolink: 1500
+  Robotistan: 1500
+  SAMM: 1500
+  Hepsiburada: 300
+# which bom item each modelled part buys (part buy key -> bom key)
+part_key:
+  NEMA17: NEMA17
+  T8 screw: T8 screw
+  T8 nut: T8 nut
+  coupling: coupling
+  '608': '608'
+  rod: rod
+  LM8UU: LM8UU
+  endstop: endstop
+  BYJ: BYJ
+  M4 rod: hw
+  LED: LED
+  diffuser: diffuser
+  heatsink: heatsink
+  ring: ring
+  base: base
+  feet: feet
+  HQ: HQ
+  lens: lens
+  Pi: Pi
+  Uno: Uno
+  cam3: ovcam
+  slide: slide
+  led5: led5

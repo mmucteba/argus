@@ -1,0 +1,93 @@
+# argus t18 shared parameters
+# units mm g s, z up, optical axis at x=0 y=0, base plate top at z=0
+# every part reads its numbers from here or from interfaces.yaml, never hard-code a value another part depends on
+# bump spec_version on every change; parts built for an older version get flagged by the checks
+spec_version: 3
+model_version: v0.3
+bed: [220.0, 220.0, 250.0]
+
+# slide and optics
+slide_l: 75.0
+slide_w: 25.0
+slide_t: 1.0
+cover_t: 0.17
+label_len: 20.0
+mag: 1.8              # waveshare zoom lens at full zoom
+na: 0.04              # not published, estimate
+wd: 55.0              # working distance at 1.8x, from the listing, measure on arrival
+lens_len: 112.0
+lens_r: 19.5
+lens_thread: 4.0
+px_native: 1.55
+binning: 2
+sensor_w: 6.287
+sensor_h: 4.712
+wavelength: 0.55
+pupil_r: 4.0
+
+# motion
+x_travel: [-25.0, 70.0]
+y_travel: [-15.0, 15.0]
+z_travel: [-5.0, 5.0]
+lead: 8.0
+steps_rev: 200
+microsteps: 16
+m4_pitch: 0.7
+byj_halfsteps_rev: 4096
+nema_hold_ncm: 40.0
+nema_pullout_ncm: 15.0
+byj_torque_ncm: 3.4
+byj_rpm: 15.0
+screw_eff: 0.3
+m4_eff: 0.2
+friction_n: 2.0
+accel: 500.0
+vmax: 20.0
+settle_s: 0.35
+capture_s: 0.30
+z_spring_n: 3.0
+roi: 15.0
+overlap: 0.25
+time_limit_s: 300.0
+
+# materials and printing
+rho_pla: 1.24
+fill_pla: 0.55
+rho_steel: 7.85
+rho_glass: 2.5
+e_steel: 200000.0
+e_pla: 2300.0
+h_per_g: 0.11
+min_wall: 1.2
+min_gap: 1.0
+insert_d: 4.0       # m3 heat-set insert hole, change to match the inserts you buy
+m3_clear_d: 3.4     # m3 bolt clearance hole
+wood_screw_d: 4.3   # hole for 4 mm wood screws into the plywood
+
+# layout
+base: [-137.0, 163.0, -117.0, 153.0]   # x0 x1 y0 y1 of the plywood
+base_t: 18.0
+xr_y: 44.0          # x rods at y = +/- xr_y
+xr_z: 20.0
+xs_y: 70.0          # x lead screw y, z
+xs_z: 24.0
+xb_x: 30.0          # x carriage bearings at x = +/- xb_x
+xblk_l: -77.0       # inner faces of the x end blocks
+xblk_r: 122.0
+xc_z: [28.0, 34.0]  # x carriage plate bottom, top
+yr_x: 42.0          # y rods at x = +/- yr_x
+yr_z: 44.0
+ys_x: 68.0          # y lead screw x, z
+ys_z: 47.0
+yb_y: 16.0          # y carriage bearings at y = +/- yb_y
+yc_z: [54.0, 60.0]  # y carriage plate bottom, top
+holder_z: [63.0, 68.2]
+diffuser_top: 25.0
+zrod_y: 76.0
+zrod_x: 18.0
+focus_z: [153.0, 189.0, 171.0]   # focus carriage bottom, top, bearing centre
+x_endstop: [-63.0, -19.5]        # sensor centre x, y on its pedestal
+ring_above_slide: 38.0           # led ring bottom height above the focal plane
+overview: {x: 75.0, y: 0.0, z_lens: 177.0, hfov: 66.0, vfov: 41.0, min_focus: 100.0}
+uno_origin: [-128.0, -111.0]
+pi_origin: [39.0, 90.0]
