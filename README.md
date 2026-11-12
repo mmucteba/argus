@@ -4,6 +4,7 @@ Low-cost automated pathology slide scanner, METU EE493 capstone, team T18.
 
 This repo is the single source of truth for the machine: every printed part as code, the shared numbers they depend on, the parts list, the wiring, and checks that prove the parts still fit together. Many people and AIs can work on different parts at the same time; the checks catch anything that breaks.
 
+- **New here? Paste [START.md](START.md) into your AI:** it sets you up and walks you through your first task
 - **Türkçe rehber, görev almak için:** [REHBER.md](REHBER.md)
 - **For AI agents:** [CONTEXT.md](CONTEXT.md)
 - **Why things are the way they are:** [DECISIONS.md](DECISIONS.md)

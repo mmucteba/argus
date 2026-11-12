@@ -4,6 +4,8 @@ Bu repo tarayıcının tamamı: basılacak her parça ayrı bir dosya, ortak öl
 
 ## Sistem 1 dakikada
 
+**Yeni misin?** [START.md](START.md) içindeki prompt'u kendi AI'ına yapıştır; GitHub'a bağlanmayı, kurulumu ve ilk görevi adım adım gösterir.
+
 **Proje sitesi:** https://mmucteba.github.io/argus/ — genel durum, doğrulama haritası, 3D görüntüleyici, parça listesi ve kablolama. Her değişiklikten ve her sabahki denetimden sonra kendini yeniler.
 
 - **Parçalar:** `parts/<modül>/<parça>.py`. Her basılacak parça tek bir dosya.
