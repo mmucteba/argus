@@ -3,7 +3,7 @@
 ## Maker's page and outline drawing (Waveshare)
 
 Source: https://www.waveshare.com/product/100x-microscope-lens-for-pi.htm
-`outline_drawing.png` is the "Outline Dimensions" drawing from the product page (unit mm).
+`outline_drawing.png` is a screenshot of Waveshare's outline drawing for this lens (unit mm), as shown on the product pages of Waveshare and of the shop we buy from (Devresel).
 
 ### Dimensioned on the drawing
 
