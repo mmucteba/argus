@@ -131,7 +131,7 @@ focus_gear_motor:
   name: Focus gear (motor)
   status: ok
   built_for_spec: 3
-  confirmed_inputs: ''
+  confirmed_inputs: 'db50a29679'
   envelope: [8, 32, 64, 88, 213, 221]
   source: model v0.3, dimensions from listings
   open: ''
