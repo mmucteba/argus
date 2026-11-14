@@ -127,8 +127,13 @@ lens:
   item: Waveshare 100X industrial microscope lens 0.12-1.8x, C mount
   buy: [lens]
   status: listing
-  evidence: https://www.waveshare.com/product/raspberry-pi/100x-microscope-lens-for-pi.htm (39 x 112 mm, 202 g, WD 55-285 mm)
-  values: {d: 39.0, length: 112.0, thread_len: 4.0, wd_max_zoom: 55.0, mag_max: 1.8, na_est: 0.04}
+  evidence: https://www.waveshare.com/product/100x-microscope-lens-for-pi.htm (39 x 112 mm, 202 g, WD 55-285 mm); the maker's
+    outline drawing in evidence/lens/ confirms d, length, flange_d and the thread; wd at 1.8x, thread_len and na are not on it,
+    so the item stays listing until the lens is measured
+  by: Ahmed
+  date: '2026-11-14'
+  values: {d: 39.0, length: 112.0, flange_d: 44.5, thread_d: 25.4, thread_len: 4.0, wd_max_zoom: 55.0, mag_max: 1.8,
+           na_est: 0.04}
 
 hq_camera:
   item: Raspberry Pi HQ Camera, C/CS mount (SC0261)
