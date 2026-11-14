@@ -69,9 +69,13 @@ endstop_board:
   item: optical endstop board (TCST2103 type), Robolink
   buy: [endstop]
   status: assumed
-  evidence: listing gives 32 x 10 x 21 mm overall; hole spacing and fork sizes are guesses
-  values: {pcb_w: 10.5, pcb_l: 33.0, pcb_t: 1.6, hole_spacing: 19.0, fork_w: 6.3, fork_l: 24.5, base_h: 2.8, fork_h: 8.0,
-           gap: 3.1}
+  evidence: sensor sizes from the Vishay TCST2103 datasheet (doc 81147, https://wwwlegacy.vishay.com/docs/81147/tcst2103.pdf,
+    drawing in evidence/endstop_board/); pcb sizes still from the listing (32 x 10 x 21 mm overall) and guesses, so the item
+    stays assumed until the board is measured
+  by: Ahmed
+  date: '2026-11-14'
+  values: {pcb_w: 10.5, pcb_l: 33.0, pcb_t: 1.6, hole_spacing: 19.0, hole_d: 3.3, fork_w: 6.3, fork_l: 24.5, body_l: 11.9,
+           base_h: 3.1, fork_h: 7.7, axis_h: 8.2, gap: 3.1}
 
 byj48:
   item: 28BYJ-48 geared stepper, 5 V
