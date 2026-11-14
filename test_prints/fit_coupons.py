@@ -21,6 +21,7 @@ INSERT = [F.m3_insert.hole_d + s for s in (-0.2, 0.0, 0.2)]
 CLEAR = [3.2, 3.4, 3.6]            # m3 clearance tries
 TAP = [2.0, 2.2, 2.4]              # m2.5 tap tries
 INSERT_DEPTH = 6.0                 # blind insert hole depth as in the task
+PUSH = 10.0                        # push out hole through the 608 seat floor
 
 
 def label(d, x, y):
@@ -41,9 +42,9 @@ def blind(d, depth, x, y):
 def build():
     plate = box(0, PX, 0, PY, 0, T)
     cuts = []
-    # 608 seats along the top left with labels under them
+    # 608 seats along the top left with a push out hole in each floor and labels under them
     for d, x in zip(SEAT, (13.0, 38.0, 63.0)):
-        cuts += [blind(d, F.bearing_608.w, x, 46.5), label(d, x, 33.0)]
+        cuts += [blind(d, F.bearing_608.w, x, 46.5), through(PUSH, x, 46.5), label(d, x, 33.0)]
     # lm8uu saddles along y open on top with the axis on the top face and labels under them
     for d, x in zip(SADDLE, (9.5, 28.5, 47.5)):
         cuts += [cyl(d / 2, (x, 6.0, T), (x, 6.0 + F.lm8uu.length, T)), label(d, x, 3.0)]
